@@ -8,9 +8,9 @@ import utils as U
 
 class dvrkClothSim(threading.Thread):
     """
-    Motion library for dvrk_python
+    Motion library for dvrk
     """
-    def __init__(self, interval_ms=10.0, ros_namespace='/dvrk_python'):
+    def __init__(self, interval_ms=10.0, ros_namespace='/dvrk'):
         threading.Thread.__init__(self)
         self.__ros_namespace = ros_namespace
         self.interval_ms = interval_ms
@@ -40,12 +40,17 @@ class dvrkClothSim(threading.Thread):
             self.rot_org[0] = rot*3.141592/180.0
         self.pos_org = pos
 
-    def move_pose_pickup(self, pos_pick, pos_drop, rot_pick, unit='rad'):
-        """
+    def move_pose_pickup(self, pos_pick, pos_drop, rot_pick, unit='rad',
+            only_do_pick=False):
+        """The main arm motion we should be using.
+
         :param pos_pick: x,y coordinate to pick up (in background space)
         :param pos_drop: x,y coordinate to drop (in background spcae)
         :param rot_pick: roll angle of grasper to pick up
         :param unit: position in (m) and rotation in (deg) or (rad)
+        :param only_do_pick: Extra debugging layer added by Daniel for
+            calibration, this will only go to the target. Use this to check if
+            it is going to the right target.
         :return:
         """
         if unit == 'deg':
@@ -53,6 +58,9 @@ class dvrkClothSim(threading.Thread):
 
         # move to the origin
         self.arm.set_pose_linear(self.pos_org, self.rot_org, 'rad')
+
+        # Daniel: added this.
+        rospy.sleep(1)
 
         # move upon the pick-up spot and open the jaw
         p_temp = np.array([pos_pick[0], pos_pick[1], self.pickup_height])
@@ -64,6 +72,9 @@ class dvrkClothSim(threading.Thread):
         pos_downward = np.array([pos_pick[0], pos_pick[1], pos_pick[2]])
         self.arm.set_pose_linear(pos_downward, r_temp, 'rad')
         self.arm.set_jaw(self.jaw_closing, False)
+
+        if only_do_pick:
+            return
 
         # move upward, move the cloth, and drop the cloth
         self.arm.set_pose_linear(p_temp, r_temp, 'rad')

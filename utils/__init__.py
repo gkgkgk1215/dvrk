@@ -1,12 +1,6 @@
-__all__ = ["arm", "ecm", "mtm", "psm", "suj", "console", "teleop_psm"]
+__all__ = ["cmnUtil", "msgConv", "livePlot", "robotics", "recordROSData", "pyThread"]
 
-# arm classes
-from .arm import arm
-from .ecm import ecm
-from .mtm import mtm
-from .psm import psm
-
-# other
-from .suj import suj
-from .console import console
-from .teleop_psm import teleop_psm
+# classes
+from dvrk.utils.LivePlot import livePlot
+from dvrk.utils.RecordROSData import recordROSData
+from dvrk.utils.PyThread import pyThread

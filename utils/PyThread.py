@@ -8,7 +8,7 @@ class ProgramKilled(Exception):
 def signal_handler(signum, frame):
     raise ProgramKilled
 
-class pyThread(threading.Thread):
+class PyThread(threading.Thread):
     def __init__(self, interval_ms):
         threading.Thread.__init__(self)
         self.interval_ms = interval_ms
@@ -40,7 +40,7 @@ class pyThread(threading.Thread):
 if __name__ == "__main__":
     signal.signal(signal.SIGTERM, signal_handler)
     signal.signal(signal.SIGINT, signal_handler)
-    job = pyThread(10)
+    job = PyThread(10)
     job.start()
 
     while True:

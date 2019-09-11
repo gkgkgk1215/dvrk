@@ -96,24 +96,70 @@
 # a['a'] = 'b'
 # print a
 
-class pySwitch:
-    def switch(self, arg):
-        self.case_name = "case_" + str(arg)
-        self.case = getattr(self, self.case_name, lambda:"default")
-        return self.case()
+# class pySwitch:
+#     def switch(self, arg):
+#         self.case_name = "case_" + str(arg)
+#         self.case = getattr(self, self.case_name, lambda:"default")
+#         return self.case()
+#
+#     def case_0(self):
+#         print "zero"
+#
+#     def case_1(self):
+#         print "one"
+#
+#     def case_2(self):
+#         print "two"
+#
+#     def case_default(self):
+#         print "default"
+#
+# p = pySwitch()
+# p.switch(2)
 
-    def case_0(self):
-        print "zero"
+# import numpy as np
+#
+# a = np.array(0, dtype=np.float)
+# a = []
+# a = np.array([0,1,2])
+#
+# print np.size(a)
 
-    def case_1(self):
-        print "one"
+# a = {}
+# a[0] = {1,'one'}
+# a[1] = {2,'two'}
+# a[2] = {3,'three'}
+#
+# ss = list(a[0])
+# print ss[1]
 
-    def case_2(self):
-        print "two"
 
-    def case_default(self):
-        print "default"
+# a = []
+# a.append(19)
+# print a
 
-p = pySwitch()
-p.switch(2)
+# import keyword
+# print keyword.kwlist
 
+import numpy as np
+a = []
+a.append([])
+a.append([])
+print a
+print a[0]
+# a[0] = [[0,0,0]]
+# a[0].append(np.array([1,2,3]))
+# a[0].append([4,5,6])
+# a[1].append(np.array([1,2,3,4]))
+# a[1].append([5,6,7,8])
+print np.shape(a)
+if a:
+    print "yes"
+else:
+    print "no"
+
+# print a[0]
+# print a[1]
+# b = [[7,8,9]]
+# print np.shape(a)
+# print np.shape(b)

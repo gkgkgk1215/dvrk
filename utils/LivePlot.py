@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import time
 
-class pyLivePlot():
+class LivePlot():
     def __init__(self, no_sample=1000):
         plt.style.use('ggplot')
         self.fig, self.axes = plt.subplots(nrows=2, figsize=(15, 12))
@@ -86,8 +86,9 @@ class pyLivePlot():
         # else: vec_max = vec.max() * (1 - margin)
         return [vec_min, vec_max]
 
+
 if __name__ == '__main__':
-    p = pyLivePlot(1000)
+    p = LivePlot(1000)
     while True:
         y1 = np.random.randn(1) * 1000
         y2 = np.random.randn(1) * 100

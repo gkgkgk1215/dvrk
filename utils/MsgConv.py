@@ -22,7 +22,6 @@ def NumpyArraytoPyKDLFrame(pos, rot):
     """
     px, py, pz = pos
     rz, ry, rx = rot
-    # rz, ry, rx = np.array([np.pi / 2, 0, -np.pi]) - np.array(rot)
     return PyKDL.Frame(PyKDL.Rotation.EulerZYX(rz, ry, rx), PyKDL.Vector(px, py, pz))
 
 
