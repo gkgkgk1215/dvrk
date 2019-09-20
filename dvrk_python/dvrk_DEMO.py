@@ -1,5 +1,5 @@
 from dvrkArm import dvrkArm
-from dvrkClothsim import  dvrkClothsim
+from dvrkClothSim import  dvrkClothSim
 import rospy
 import numpy as np
 import time
@@ -52,7 +52,7 @@ def init_conf_curve():
     p2.set_pose(pos_curve_org2, rot_curve_org2, 'deg')
     p2.set_jaw(jaw_curve_org2, 'deg')
 
-T = 3   # period
+T = 6   # period
 def make_curve(t):
     # Lemniscate of Bernoulli
     a = 0.03
@@ -67,7 +67,7 @@ def make_curve(t):
     rot_lem = [0.0, 0.0, 0.0]
     jaw_lem = [jaw]
     p1.set_pose(pos_lem, rot_lem, 'deg', False)
-    p1.set_jaw(jaw_lem, 'deg', False)
+    # p1.set_jaw(jaw_lem, 'deg', False)
 
     x = ratio*(a * 2 ** 0.5 * np.cos(t_)) / (np.sin(t_) * np.sin(t_) + 1)
     y = (a * 2 ** 0.5 * np.cos(t_) * np.sin(t_)) / (np.sin(t_) * np.sin(t_) + 1)
@@ -78,7 +78,7 @@ def make_curve(t):
     rot_lem = [0.0, 0.0, 0.0]
     jaw_lem = [jaw2]
     p2.set_pose(pos_lem, rot_lem, 'deg', False)
-    p2.set_jaw(jaw_lem, 'deg', False)
+    # p2.set_jaw(jaw_lem, 'deg', False)
 
 if __name__ == "__main__":
     # print p1.get_current_pose('deg')
@@ -97,7 +97,7 @@ if __name__ == "__main__":
             except rospy.ROSInterruptException:
                 pass
     elif DEMO == 'cloth':
-        p = dvrkClothsim()
+        p = dvrkClothSim()
         p.set_position_origin([0.0, 0.03, -0.14], 0, 'deg')
         while True:
             p.move_pose_pickup([0.06, 0.0], [0.04, 0.02], 0, 'deg')

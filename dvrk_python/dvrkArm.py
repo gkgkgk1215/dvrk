@@ -1,7 +1,7 @@
 import threading
 import rospy
 
-import utils as U
+import dvrk.utils.CmnUtil as U
 import numpy as np
 import PyKDL
 

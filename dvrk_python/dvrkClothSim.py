@@ -3,7 +3,7 @@ import threading
 import time
 import rospy
 import numpy as np
-import utils as U
+import dvrk.utils as U
 
 
 class dvrkClothSim(threading.Thread):
