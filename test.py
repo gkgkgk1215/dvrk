@@ -145,18 +145,18 @@ import numpy as np
 a = []
 a.append([])
 a.append([])
-print a
-print a[0]
+print (a)
+print (a[0])
 # a[0] = [[0,0,0]]
 # a[0].append(np.array([1,2,3]))
 # a[0].append([4,5,6])
 # a[1].append(np.array([1,2,3,4]))
 # a[1].append([5,6,7,8])
-print np.shape(a)
+print (np.shape(a))
 if a:
-    print "yes"
+    print ("yes")
 else:
-    print "no"
+    print ("no")
 
 # print a[0]
 # print a[1]

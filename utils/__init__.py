@@ -1,4 +1,4 @@
-__all__ = ["cmnUtil", "msgConv", "livePlot", "robotics", "recordROSData", "pyThread"]
+__all__ = ["CmnUtil", "MsgConv", "LivePlot", "Robotics", "RecordROSData", "PyThread"]
 
 # classes
 from dvrk.utils.LivePlot import LivePlot

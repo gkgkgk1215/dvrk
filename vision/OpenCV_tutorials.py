@@ -1,3 +1,5 @@
+# based on Python 3.7 / OpenCV
+
 import cv2
 import matplotlib.pyplot as plt
 from random import shuffle
@@ -725,7 +727,7 @@ def camShift():
 
 
 if __name__ == "__main__":
-    # showImage()
+    showImage()
     # showVideo()
     # writeVideo()
     # drawing()
@@ -753,4 +755,4 @@ if __name__ == "__main__":
     # tmpMatching()
     # hough()
     # watershed()
-    camShift()
+    # camShift()
