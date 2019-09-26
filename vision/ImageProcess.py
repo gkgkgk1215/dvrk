@@ -8,8 +8,8 @@ class ImageConverter(threading.Thread):
     def __init__(self):
         # data members
         self.__bridge = CvBridge()
-        self.__image_cv_left = []
-        self.__image_cv_right = []
+        self.__img_raw_left = []
+        self.__img_raw_right = []
 
         # threading
         threading.Thread.__init__(self)
@@ -41,9 +41,34 @@ class ImageConverter(threading.Thread):
 
     def run(self, stop):
         while True:
-            # To do
-            cv2.imshow("Image_raw_left", self.__image_cv_left)
-            cv2.imshow("Image_raw_right", self.__image_cv_right)
+            # Resizing images
+            img1 = cv2.resize(self.__img_raw_left, (640, 360))
+            img2 = cv2.resize(self.__img_raw_right, (640, 360))
+
+            # Blurring
+            val = 5
+            # blur1 = img1
+            # blur1 = cv2.blur(img1, (val, val))
+            # blur1 = cv2.GaussianBlur(img1, (val, val), 0)
+            blur1 = cv2.medianBlur(img1, val)
+            # blur1 = cv2.bilateralFilter(img1, 15, 20, 20)
+
+            gray1 = cv2.cvtColor(blur1, cv2.COLOR_BGR2GRAY)
+
+            # CLAHE
+            clahe_obj1 = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+            histeq1 = clahe_obj1.apply(gray1)
+            # histeq1 = cv2.equalizeHist(gray1)
+
+            # Canny Edge detection
+            edge1 = cv2.Canny(histeq1, 50, 200)
+
+            cv2.imshow("original1", img1)
+            cv2.imshow("blur1", blur1)
+            cv2.imshow("gray1", gray1)
+            cv2.imshow("clahe1", histeq1)
+            cv2.imshow("edge1", edge1)
+            # cv2.imshow("Image_raw_right", img2)
             self.rate.sleep()
 
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -53,13 +78,13 @@ class ImageConverter(threading.Thread):
 
     def __image_raw_left_cb(self, data):
         try:
-            self.__image_cv_left = self.__bridge.imgmsg_to_cv2(data, "bgr8")
+            self.__img_raw_left = self.__bridge.imgmsg_to_cv2(data, "bgr8")
         except CvBridgeError as e:
             print(e)
 
     def __image_raw_right_cb(self, data):
         try:
-            self.__image_cv_right = self.__bridge.imgmsg_to_cv2(data, "bgr8")
+            self.__img_raw_right = self.__bridge.imgmsg_to_cv2(data, "bgr8")
         except CvBridgeError as e:
             print(e)
 
