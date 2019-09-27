@@ -116,9 +116,11 @@ class RecordROSData(threading.Thread):
 
 
 if __name__ == '__main__':
-    p = RecordROSData(1000)
-    p.add_topic('/dvrk/PSM2/position_cartesian_current', PoseStamped, 'pose_record')
-    p.add_topic('/dvrk/PSM2/joint_states', JointState, 'joint_record')
+    p = RecordROSData(10)
+    # p.add_topic('/dvrk/PSM2/position_cartesian_current', PoseStamped, 'pose_record')
+    # p.add_topic('/dvrk/PSM2/joint_states', JointState, 'joint_record')
+    # p.add_topic('/dvrk/PSM1/io/actuator_current_measured', JointState, 'actual_current_peg_transfer_PSM1')
+    # p.add_topic('/dvrk/PSM2/io/actuator_current_measured', JointState, 'actual_current_peg_transfer_PSM2')
     rospy.spin()
     if rospy.ROSException:
         p.write_file()
