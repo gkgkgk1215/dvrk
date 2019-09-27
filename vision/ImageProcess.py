@@ -1,8 +1,9 @@
 import cv2
 import rospy
-from sensor_msgs.msg import Image
+from sensor_msgs.msg import Image, CompressedImage
 from cv_bridge import CvBridge, CvBridgeError
 import threading
+import numpy as np
 
 class ImageConverter(threading.Thread):
     def __init__(self):
@@ -17,8 +18,8 @@ class ImageConverter(threading.Thread):
         self.__stop_flag = False
 
         # subscriber
-        self.__sub_list = [rospy.Subscriber('/endoscope/left/image_raw', Image, self.__image_raw_left_cb),
-                           rospy.Subscriber('/endoscope/right/image_raw', Image, self.__image_raw_right_cb)]
+        self.__sub_list = [rospy.Subscriber('/endoscope/left/image_raw/compressed', CompressedImage, self.__img_raw_left_cb),
+                           rospy.Subscriber('/endoscope/right/image_raw/compressed', CompressedImage, self.__img_raw_right_cb)]
 
         # create node
         if not rospy.get_node_uri():
@@ -76,18 +77,27 @@ class ImageConverter(threading.Thread):
                 stop()
                 break
 
-    def __image_raw_left_cb(self, data):
+    def __img_raw_left_cb(self, data):
         try:
-            self.__img_raw_left = self.__bridge.imgmsg_to_cv2(data, "bgr8")
+            if type(data).__name__ == 'CompressedImage':
+                self.__img_raw_left = self.__compressedimg2cv2(data)
+            elif type(data).__name__ == 'Image':
+                self.__img_raw_left = self.__bridge.imgmsg_to_cv2(data, "bgr8")
         except CvBridgeError as e:
             print(e)
 
-    def __image_raw_right_cb(self, data):
+    def __img_raw_right_cb(self, data):
         try:
-            self.__img_raw_right = self.__bridge.imgmsg_to_cv2(data, "bgr8")
+            if type(data).__name__ == 'CompressedImage':
+                self.__img_raw_right = self.__compressedimg2cv2(data)
+            elif type(data).__name__ == 'Image':
+                self.__img_raw_right = self.__bridge.imgmsg_to_cv2(data, "bgr8")
         except CvBridgeError as e:
             print(e)
 
+    def __compressedimg2cv2(self, comp_data):
+        np_arr = np.fromstring(comp_data.data, np.uint8)
+        return cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
 if __name__ == '__main__':
     ic = ImageConverter()
