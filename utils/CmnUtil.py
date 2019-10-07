@@ -145,3 +145,5 @@ def move_p_from_net_output(x, y, dx, dy, row_board, col_board, data_square, p):
     # if user_input == "y":
     p.move_pose_pickup(pickup_pos, release_pos, 0, 'rad')
 
+def LPF(data_curr, data_prev, fc, dt):
+    return 2*np.pi*fc*dt*data_curr + (1-2*np.pi*fc*dt)*data_prev;

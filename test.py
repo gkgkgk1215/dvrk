@@ -141,25 +141,66 @@
 # import keyword
 # print keyword.kwlist
 
-import numpy as np
-a = []
-a.append([])
-a.append([])
-print (a)
-print (a[0])
+# import numpy as np
+# a = []
+# a.append([])
+# a.append([])
+# print (a)
+# print (a[0])
 # a[0] = [[0,0,0]]
 # a[0].append(np.array([1,2,3]))
 # a[0].append([4,5,6])
 # a[1].append(np.array([1,2,3,4]))
 # a[1].append([5,6,7,8])
-print (np.shape(a))
-if a:
-    print ("yes")
-else:
-    print ("no")
+# print (np.shape(a))
+# if a:
+#     print ("yes")
+# else:
+#     print ("no")
 
 # print a[0]
 # print a[1]
 # b = [[7,8,9]]
 # print np.shape(a)
 # print np.shape(b)
+
+# import numpy as np
+# print np.pi
+
+# # import matplotlib.pyplot as plt
+# # We prepare the plot
+# fig = plt.figure(1)
+# # We define a fake subplot that is in fact only the plot.
+# ax = fig.add_subplot(111)
+#
+# # We change the fontsize of minor ticks label
+# ax.tick_params(axis='both', which='major', labelsize=10)
+# ax.tick_params(axis='both', which='minor', labelsize=8)
+#
+# fig.show()
+
+# a = [10,9,8,7,6,5,4,3,2,1]
+# for i in range(len(a)):
+#     if a[i] < 5:
+#         a = a[:i]
+#         break
+#
+# print a
+
+# import numpy as np
+# a = [[1,2,3,4,5],[6,7,8,9,10],[11,12,13,14,15]]
+# print a[:2]
+# a = np.array(a)
+# print a.shape, a.shape[:2]
+# b = [1,2,3,4,5,6]
+# print b[:3]
+
+# import numpy as np
+# a = np.mgrid[0:5,0:3]
+# print np.shape(a)
+# print a
+# print a[:,3,1]
+
+# import numpy as np
+# a = np.load('vision/calib.npz')
+# print a['mtx']

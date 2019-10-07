@@ -727,8 +727,8 @@ def camShift():
 
 
 if __name__ == "__main__":
-    showImage()
-    # showVideo()
+    # showImage()
+    showVideo()
     # writeVideo()
     # drawing()
     # mouseBrush()
