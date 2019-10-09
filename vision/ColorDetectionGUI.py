@@ -6,6 +6,8 @@ Created on Tue Dec  4 01:41:32 2018
 """
 
 import sys
+sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages')
+
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication, QDialog
@@ -17,7 +19,7 @@ import numpy as np
 class ColorDetector(QDialog):
     def __init__(self):
         super(ColorDetector, self).__init__()
-        loadUi('OpenCV.ui', self)
+        loadUi('ColorDetectionGUI.ui', self)
         self.image = None
         self.start_button.clicked.connect(self.start_webcam)
         self.stop_button.clicked.connect(self.stop_webcam)
