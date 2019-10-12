@@ -202,5 +202,43 @@
 # print a[:,3,1]
 
 # import numpy as np
-# a = np.load('vision/calib.npz')
+# a = np.load('vision/calib_191010.npz')
 # print a['mtx']
+
+# a = ('aa', 'bb')
+# print type(a)
+# for i in a:
+#     print i
+
+# import numpy as np
+# a = np.matrix([[1, 2, 3, 4], [5, 6, 7, 8]])
+# b = np.reshape(a, -1)
+# print a
+# print a.shape
+# print b
+# print b.shape
+
+# import numpy as np
+# row = 7
+# col = 5
+# objp = np.zeros((row*col, 3), np.float32)
+# print objp
+# objp[:,:2] = np.mgrid[0:row, 0:col].T.reshape(-1,2)
+# print objp
+# a = np.mgrid[0:7, 0:5].T.reshape(-1,2)
+# print np.mgrid[0:7, 0:5].T
+# print np.mgrid[0:7, 0:5].T.reshape(-1,2)
+# print np.mgrid[0:6, 0:6].T.reshape(-1,3)
+# axis = np.float32([[0,0,0], [0,row-1,0], [row-1,row-1,0], [row-1,0,0], [0,0,-row+1], [0,row-1,-row+1], [row-1,row-1,-row+1], [row-1,0,-row+1]])
+# print axis
+
+import cv2
+
+# stop_flag = False
+# while not stop_flag:
+#     user_input = raw_input("you want to quit?(y or n)")
+#     if user_input == 'y':
+#         stop_flag = True
+#         print "aa"
+#         break
+
