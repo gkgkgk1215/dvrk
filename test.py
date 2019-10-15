@@ -242,3 +242,28 @@ import cv2
 #         print "aa"
 #         break
 
+# import numpy as np
+# with np.load('vision/calib_kinect.npz') as X:
+#     ret, mtx, dist, _, _ = [X[i] for i in ('ret', 'mtx', 'dist', 'rvecs', 'tvecs')]
+#     print ret, mtx
+#
+# with np.load('vision/calib_kinect_44.npz') as X:
+#     ret, mtx, dist, _, _ = [X[i] for i in ('ret', 'mtx', 'dist', 'rvecs', 'tvecs')]
+#     print ret, mtx
+
+# import numpy as np
+# a = (100,50)
+# print type(a)
+# b = tuple([100, 50])
+# print type(b)
+# print b
+# c = tuple(np.array([500,50]))
+# print c
+# print type(c)
+
+a = dict()
+__cam_type = ('USB', 'ROS_TOPIC')
+for type in __cam_type:
+    a[type] = []
+
+print a

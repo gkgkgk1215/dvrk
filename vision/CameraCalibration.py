@@ -2,19 +2,20 @@ import cv2
 import rospy
 from sensor_msgs.msg import Image, CompressedImage
 from cv_bridge import CvBridge, CvBridgeError
-import threading
 import numpy as np
 import pyrealsense2 as rs
 
 class CameraCalibration():
-    def __init__(self, checkerboard_row, checkerboard_col, cam_type='USB'):
+    def __init__(self, checkerboard_row, checkerboard_col, cam_type='USB', filename='calib.npz'):
         # data members
         self.__row = checkerboard_row
         self.__col = checkerboard_col
         self.__cam_type = cam_type
-        self.__img_raw_cam = []
+        self.__filename = filename
         self.__bridge = CvBridge()
+        self.__img_raw_cam = []
 
+        # initialize camera
         if self.__cam_type == 'USB':
             # USB camera initialize
             try:
@@ -32,8 +33,7 @@ class CameraCalibration():
             self.pipeline.start(self.config)
         elif self.__cam_type == 'ROS_TOPIC':
             # ROS subscriber
-            self.__sub = rospy.Subscriber('/kinect2/qhd/image_color', Image,
-                                          self.__img_raw_cam_cb)
+            rospy.Subscriber('/kinect2/hd/image_color', Image, self.__img_raw_cam_cb)
             # create ROS node
             if not rospy.get_node_uri():
                 rospy.init_node('Image_pipeline_node', anonymous=True, log_level=rospy.WARN)
@@ -104,11 +104,9 @@ class CameraCalibration():
                 self.pipeline.stop()
             if objpoints != [] and imgpoints != []:
                 ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
-                filename = 'calib.npz'
-                np.savez(filename, ret=ret, mtx=mtx, dist=dist, rvecs=rvecs, tvecs=tvecs)
-                print "Calibration data has been saved to", filename
+                np.savez(self.__filename, ret=ret, mtx=mtx, dist=dist, rvecs=rvecs, tvecs=tvecs)
+                print "Calibration data has been saved to", self.__filename
                 print "mtx", mtx
-                print "tvecs", tvecs
             else:
                 print "Calibration data is empty"
 
@@ -126,4 +124,4 @@ class CameraCalibration():
         return cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
 if __name__ == '__main__':
-    cc = CameraCalibration(checkerboard_row=13, checkerboard_col=9, cam_type='ROS_TOPIC')
+    cc = CameraCalibration(checkerboard_row=13, checkerboard_col=9, cam_type='ROS_TOPIC', filename='calib.npz')
