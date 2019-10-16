@@ -68,9 +68,6 @@ class CameraCalibration():
         axis = np.float32([[0, 0, 0], [0, col - 1, 0], [row - 1, col - 1, 0], [row - 1, 0, 0], [0, 0, -height + 1],
                            [0, col - 1, -height + 1], [row - 1, col - 1, -height + 1], [row - 1, 0, -height + 1]])
 
-        objpoints = []
-        imgpoints = []
-
         try:
             while True:
                 if self.__cam_type == 'USB':
@@ -129,4 +126,4 @@ class CameraCalibration():
         return cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
 if __name__ == '__main__':
-    cc = CameraCalibration(cube_row=13, cube_col=9, cube_height=10, cam_type='ROS_TOPIC', filename='calib_kinect_qhd.npz')
+    cc = CameraCalibration(cube_row=13, cube_col=9, cube_height=10, cam_type='REALSENSE', filename='calib_realsense.npz')

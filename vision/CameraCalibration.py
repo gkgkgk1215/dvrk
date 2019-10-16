@@ -33,7 +33,7 @@ class CameraCalibration():
             self.pipeline.start(self.config)
         elif self.__cam_type == 'ROS_TOPIC':
             # ROS subscriber
-            rospy.Subscriber('/kinect2/hd/image_color', Image, self.__img_raw_cam_cb)
+            rospy.Subscriber('/kinect2/qhd/image_color', Image, self.__img_raw_cam_cb)
             # create ROS node
             if not rospy.get_node_uri():
                 rospy.init_node('Image_pipeline_node', anonymous=True, log_level=rospy.WARN)
@@ -124,4 +124,4 @@ class CameraCalibration():
         return cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
 if __name__ == '__main__':
-    cc = CameraCalibration(checkerboard_row=13, checkerboard_col=9, cam_type='ROS_TOPIC', filename='calib.npz')
+    cc = CameraCalibration(checkerboard_row=13, checkerboard_col=9, cam_type='USB', filename='calib.npz')

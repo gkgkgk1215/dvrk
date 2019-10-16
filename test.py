@@ -261,9 +261,28 @@ import cv2
 # print c
 # print type(c)
 
-a = dict()
-__cam_type = ('USB', 'ROS_TOPIC')
-for type in __cam_type:
-    a[type] = []
+# a = dict()
+# __cam_type = ('USB', 'ROS_TOPIC')
+# for type in range(len(__cam_type)):
+#     print type
+#
+# print __cam_type.index('ROS_TOPIC')
 
-print a
+import numpy as np
+# a = [[],[]]
+# a[0] = [1,2,3]
+# a[1] = [4,5,6]
+
+# import numpy as np
+# a = [1,2,3]
+# b = [4,5,6]
+# c = np.vstack((a,b))
+# print c
+# np.savetxt('testsave', c)
+
+import numpy as np
+
+with np.load('vision/Dual_cam_calib.npz') as X:
+    imgpoints1, imgpoints2 = [X[i] for i in ('imgpoints1', 'imgpoints2')]
+    print imgpoints1
+    print imgpoints2
