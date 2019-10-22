@@ -6,12 +6,12 @@ import numpy as np
 import pyrealsense2 as rs
 
 class CameraCalibration():
-    def __init__(self, checkerboard_row, checkerboard_col, cam_type='USB', filename='calib.npz'):
+    def __init__(self, checkerboard_row, checkerboard_col, cam_type='USB', savefilename='calib.npz'):
         # data members
         self.__row = checkerboard_row
         self.__col = checkerboard_col
         self.__cam_type = cam_type
-        self.__filename = filename
+        self.__filename = savefilename
         self.__bridge = CvBridge()
         self.__img_raw_cam = []
 
@@ -124,4 +124,4 @@ class CameraCalibration():
         return cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
 if __name__ == '__main__':
-    cc = CameraCalibration(checkerboard_row=13, checkerboard_col=9, cam_type='USB', filename='calib.npz')
+    cc = CameraCalibration(checkerboard_row=13, checkerboard_col=9, cam_type='USB', savefilename='calib.npz')

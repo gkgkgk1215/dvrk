@@ -232,7 +232,7 @@
 # axis = np.float32([[0,0,0], [0,row-1,0], [row-1,row-1,0], [row-1,0,0], [0,0,-row+1], [0,row-1,-row+1], [row-1,row-1,-row+1], [row-1,0,-row+1]])
 # print axis
 
-import cv2
+# import cv2
 
 # stop_flag = False
 # while not stop_flag:
@@ -280,9 +280,21 @@ import numpy as np
 # print c
 # np.savetxt('testsave', c)
 
-import numpy as np
+# import numpy as np
+#
+# with np.load('vision/Dual_cam_calib.npz') as X:
+#     imgpoints1, imgpoints2 = [X[i] for i in ('imgpoints1', 'imgpoints2')]
+#     print imgpoints1
+#     print imgpoints2
 
-with np.load('vision/Dual_cam_calib.npz') as X:
-    imgpoints1, imgpoints2 = [X[i] for i in ('imgpoints1', 'imgpoints2')]
-    print imgpoints1
-    print imgpoints2
+# import numpy as np
+# a = np.array([[1,2,3],[4,5,6],[7,8,9]])
+# t = np.array([11,12,13])[np.newaxis]
+# Tmtx = np.vstack((np.hstack((a,t.T)), [0,0,0,1]))
+# print Tmtx
+
+a = 55.5555
+b = 44.4444
+c = 33.3333
+str = "{2.4f},{3.2f},{3.2f}".format(1/0.3,1/0.3,1/0.3)
+print str

@@ -92,10 +92,17 @@ class CameraCalibration():
                     if ret == True:
                         cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), termination)
                         _, rvecs, tvecs, inliers = cv2.solvePnPRansac(objp, corners, mtx, dist)
+                        # print rvecs[0], rvecs[1], rvecs[2]
+
+                        Rc1m = np.array(cv2.Rodrigues(rvecs)[0])    # 3x3 rotation matrix
+                        tc1m = np.array(tvecs)  # translational vector
+                        Tc1m = np.vstack((np.hstack((Rc1m, tc1m)), [0, 0, 0, 1])) # 4x4 homogeneous transformation matrix
+                        print Tc1m
 
                         # Put text presenting the distance
                         font = cv2.FONT_HERSHEY_SIMPLEX
-                        cv2.putText(img, str(tvecs[2]), (20,50), font, 1, (0, 255, 0), 3)
+                        str = str("%4.1f, %4.1f, %4.1f".format(tvecs[0], tvecs[1], tvecs[2]))
+                        cv2.putText(img, str, (20,50), font, 1, (0, 255, 0), 3)
                         imgpts, jac = cv2.projectPoints(axis, rvecs, tvecs, mtx, dist)
                         img = self.drawCube(img, imgpts)
 
