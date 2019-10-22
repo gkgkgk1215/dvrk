@@ -94,15 +94,17 @@ class CameraCalibration():
                         _, rvecs, tvecs, inliers = cv2.solvePnPRansac(objp, corners, mtx, dist)
                         # print rvecs[0], rvecs[1], rvecs[2]
 
-                        Rc1m = np.array(cv2.Rodrigues(rvecs)[0])    # 3x3 rotation matrix
-                        tc1m = np.array(tvecs)  # translational vector
-                        Tc1m = np.vstack((np.hstack((Rc1m, tc1m)), [0, 0, 0, 1])) # 4x4 homogeneous transformation matrix
-                        print Tc1m
+                        # Rc1m = np.array(cv2.Rodrigues(rvecs)[0])    # 3x3 rotation matrix
+                        # tc1m = np.array(tvecs)  # translational vector
+                        # Tc1m = np.vstack((np.hstack((Rc1m, tc1m)), [0, 0, 0, 1])) # 4x4 homogeneous transformation matrix
+                        # print Tc1m
 
                         # Put text presenting the distance
                         font = cv2.FONT_HERSHEY_SIMPLEX
-                        str = str("%4.1f, %4.1f, %4.1f".format(tvecs[0], tvecs[1], tvecs[2]))
-                        cv2.putText(img, str, (20,50), font, 1, (0, 255, 0), 3)
+                        pos_str = "%0.1f, %0.1f, %0.1f" % (tvecs[0], tvecs[1], tvecs[2])
+                        rot_str = "%0.1f, %0.1f, %0.1f" % (rvecs[0]*180/3.14, rvecs[1]*180/3.14, rvecs[2]*180/3.14)
+                        cv2.putText(img, pos_str, (20,50), font, 1, (0, 255, 0), 3)
+                        cv2.putText(img, rot_str, (20,80), font, 1, (0, 255, 0), 3)
                         imgpts, jac = cv2.projectPoints(axis, rvecs, tvecs, mtx, dist)
                         img = self.drawCube(img, imgpts)
 
@@ -133,4 +135,4 @@ class CameraCalibration():
         return cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
 if __name__ == '__main__':
-    cc = CameraCalibration(cube_row=13, cube_col=9, cube_height=10, cam_type='REALSENSE', filename='calib_realsense.npz')
+    cc = CameraCalibration(cube_row=13, cube_col=9, cube_height=6, cam_type='USB', filename='calib_laptop.npz')

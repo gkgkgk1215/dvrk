@@ -296,5 +296,5 @@ import numpy as np
 a = 55.5555
 b = 44.4444
 c = 33.3333
-str = "{2.4f},{3.2f},{3.2f}".format(1/0.3,1/0.3,1/0.3)
+str = "%0.1f\n%0.1f\n%0.1f\n" % (a,b,c)
 print str
