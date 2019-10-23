@@ -49,7 +49,7 @@ class dvrkClothSim(threading.Thread):
         :param rot_pick: roll angle of grasper to pick up
         :param unit: position in (m) and rotation in (deg) or (rad)
         :param only_do_pick: Extra debugging layer added by Daniel for
-            calibration, this will only go to the target. Use this to check if
+            calibration_files, this will only go to the target. Use this to check if
             it is going to the right target.
         :return:
         """

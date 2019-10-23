@@ -34,9 +34,9 @@ def load_mapping_table(row_board, column_board, file_name, cloth_height=0.005):
 
     :param row_board: number of rows.
     :param column_board: number of columns.
-    :param file_name: name of the calibration file
+    :param file_name: name of the calibration_files file
     :param cloth_height: height offset
-    :return: data from calibration
+    :return: data from calibration_files
     """
     if path.exists(file_name):
         # import data from file
@@ -76,7 +76,7 @@ def transform_CB2PSM(x, y, row_board, col_board, data_square):
 
     :param row_board: number of rows.
     :param col_board: number of columns.
-    :param data_square: data from calibration.
+    :param data_square: data from calibration_files.
     """
     if x>1: x=1.0
     if x<-1: x=-1.0
@@ -120,12 +120,12 @@ def transform_CB2PSM(x, y, row_board, col_board, data_square):
 
 
 def move_p_from_net_output(x, y, dx, dy, row_board, col_board, data_square, p):
-    """Minho's code, for calibration, processes policy network output.
+    """Minho's code, for calibration_files, processes policy network output.
 
     :params (x, y, dx, dy): outputs from the neural network.
     :param row_board: number of rows.
     :param col_board: number of columns.
-    :param data_square: data from calibration.
+    :param data_square: data from calibration_files.
     :param p: An instance of `dvrkClothSim`.
     """
     pickup_pos = transform_CB2PSM(x,

@@ -135,4 +135,4 @@ class CameraCalibration():
         return cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
 if __name__ == '__main__':
-    cc = CameraCalibration(cube_row=13, cube_col=9, cube_height=6, cam_type='USB', filename='calib_laptop.npz')
+    cc = CameraCalibration(cube_row=13, cube_col=9, cube_height=6, cam_type='ROS_TOPIC', filename='calib_kinect_qhd.npz')

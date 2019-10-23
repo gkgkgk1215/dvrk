@@ -8,13 +8,14 @@ import pyrealsense2 as rs
 
 # Find Chessboard corners simultaneously from dual camera and calculate transformation matrix between those two.
 class DualCamCalibration():
-    def __init__(self, checkerboard_row, checkerboard_col, drawing_box_height, cam_type, loadfilename):
+    def __init__(self, checkerboard_row, checkerboard_col, drawing_box_height, cam_type, loadfilename, savefilename):
         # data members
         self.__row = checkerboard_row
         self.__col = checkerboard_col
         self.__height = drawing_box_height
         self.__cam_type = cam_type
-        self.__filename = loadfilename
+        self.__loadfilename = loadfilename
+        self.__savefilename = savefilename
         self.__bridge = CvBridge()
         self.__img_raw_cam = [[],[]]
 
@@ -76,8 +77,8 @@ class DualCamCalibration():
         dist = [[],[]]
         rvecs = [[],[]]
         tvecs = [[],[]]
-        for i in range(len(self.__filename)):
-            with np.load(self.__filename[i]) as X:
+        for i in range(len(self.__loadfilename)):
+            with np.load(self.__loadfilename[i]) as X:
                 _, mtx[i], dist[i], _, _ = [X[n] for n in ('ret', 'mtx', 'dist', 'rvecs', 'tvecs')]
 
         try:
@@ -86,7 +87,6 @@ class DualCamCalibration():
                 img2 = self.__img_raw_cam[1]
                 if img1 != [] and img2 != []:
                     key = cv2.waitKey(1) & 0xFF
-                    # if key == ord('\r'):  # ENTER
                     gray1 = cv2.cvtColor(self.__img_raw_cam[0], cv2.COLOR_BGR2GRAY)
                     gray2 = cv2.cvtColor(self.__img_raw_cam[1], cv2.COLOR_BGR2GRAY)
 
@@ -103,35 +103,54 @@ class DualCamCalibration():
                         _, rvecs[1], tvecs[1], _ = cv2.solvePnPRansac(objp, corners2_, mtx[1], dist[1])
 
                         tc1m = np.array(tvecs[0]) * 10  # (mm)
-                        # tc2m = np.array(tvecs[1]) * 10  # (mm)
+                        tc2m = np.array(tvecs[1]) * 10  # (mm)
+                        Rc1m = cv2.Rodrigues(rvecs[0])[0]
+                        Rc2m = cv2.Rodrigues(rvecs[1])[0]
+                        Tc1m = np.vstack((np.hstack((Rc1m, tc1m)), [0, 0, 0, 1]))
+                        Tc2m = np.vstack((np.hstack((Rc2m, tc2m)), [0, 0, 0, 1]))
 
-                        print tc1m
+                        # Transformation matrix from cam 1 to cam 2
+                        Tc1c2 = np.matrix(Tc1m) * np.linalg.inv(np.matrix(Tc2m))
+                        Rc1c2 = Tc1c2[0:3,0:3]
+                        rvecsc1c2 = np.array(cv2.Rodrigues(Rc1c2))
+                        tvecsc1c2 = Tc1c2[0:3,3]
 
-                        # Rc1m = cv2.Rodrigues(rvecs[0])[0]
-                        # Rc2m = cv2.Rodrigues(rvecs[1])[0]
-                        # Tc1m = np.vstack((np.hstack((Rc1m, tc1m)), [0, 0, 0, 1]))
-                        # Tc2m = np.vstack((np.hstack((Rc2m, tc2m)), [0, 0, 0, 1]))
-
-                        # Tc1c2 = np.multiply(Tc1m, np.linalg.inv(Tc2m))
-                        # Tc1c2 = np.multiply(np.linalg.inv(Tc1m), Tc2m)
-                        # print Tc1c2
+                        # Draw cube
+                        imgpts1, jac1 = cv2.projectPoints(axis, rvecs[0], tvecs[0], mtx[0], dist[0])
+                        img1 = self.drawCube(img1, imgpts1)
+                        imgpts2, jac2 = cv2.projectPoints(axis, rvecs[1], tvecs[1], mtx[1], dist[1])
+                        img2 = self.drawCube(img2, imgpts2)
 
                         # Put text presenting the distance
                         font = cv2.FONT_HERSHEY_SIMPLEX
-                        cv2.putText(img1, str(tvecs[0][2]), (20, 50), font, 1, (0, 255, 0), 3)
-                        cv2.putText(img2, str(tvecs[1][2]), (20, 50), font, 1, (0, 255, 0), 3)
-                        imgpts1, jac1 = cv2.projectPoints(axis, rvecs[0], tvecs[0], mtx[0], dist[0])
-                        imgpts2, jac2 = cv2.projectPoints(axis, rvecs[1], tvecs[1], mtx[1], dist[1])
-                        img1 = self.drawCube(img1, imgpts1)
-                        img2 = self.drawCube(img2, imgpts2)
-                        # print ("Corner captured: %d trials" % (cnt))
-                    # else:
-                    #     print ("Corner not captured, try again")
-                    # elif key == ord('q'):  # ESD
-                    #     self.__stop_flag = True
-                    #     break
-                    cv2.imshow('img1', img1)
-                    cv2.imshow('img2', img2)
+                        pos_str1 = "%0.1f, %0.1f, %0.1f" % (tvecs[0][0], tvecs[0][1], tvecs[0][2])
+                        rot_str1 = "%0.1f, %0.1f, %0.1f" % (rvecs[0][0]*180/3.14, rvecs[0][1]*180/3.14, rvecs[0][2]*180/3.14)
+                        pos_str3 = "%0.1f, %0.1f, %0.1f" % (tvecsc1c2[0], tvecsc1c2[1], tvecsc1c2[2])
+                        rot_str4 = "%0.1f, %0.1f, %0.1f" % (rvecsc1c2[0][0]*180/3.14, rvecsc1c2[0][1]*180/3.14, rvecsc1c2[0][2]*180/3.14)
+                        cv2.putText(img1, pos_str1, (20, 50), font, 1, (0, 255, 0), 3)
+                        cv2.putText(img1, rot_str1, (20, 80), font, 1, (0, 255, 0), 3)
+                        cv2.putText(img1, pos_str3, (300, 430), font, 1, (0, 255, 0), 3)
+                        cv2.putText(img1, rot_str4, (300, 460), font, 1, (0, 255, 0), 3)
+
+                        pos_str2 = "%0.1f, %0.1f, %0.1f" % (tvecs[1][0], tvecs[1][1], tvecs[1][2])
+                        rot_str2 = "%0.1f, %0.1f, %0.1f" % (rvecs[1][0] * 180 / 3.14, rvecs[1][1] * 180 / 3.14, rvecs[1][2] * 180 / 3.14)
+                        cv2.putText(img2, pos_str2, (20, 50), font, 1, (0, 255, 0), 3)
+                        cv2.putText(img2, rot_str2, (20, 80), font, 1, (0, 255, 0), 3)
+
+
+                        if key == ord('\r'):  # ENTER
+                            np.savez(self.__savefilename, cam_transform=Tc1c2)
+                            print "camera transformation mtx has been saved"
+
+                    if key == ord('q'):  # ESD
+                        self.__stop_flag = True
+                        break
+                    cv2.namedWindow('Camera 1')
+                    cv2.moveWindow('Camera 1', 100, 50)
+                    cv2.imshow('Camera 1', img1)
+                    cv2.namedWindow('Camera 2')
+                    cv2.moveWindow('Camera 2', 740, 50)
+                    cv2.imshow('Camera 2', img2)
         finally:
             if self.__cam_type == 'USB':
                 self.cap.release()
@@ -188,4 +207,7 @@ class DualCamCalibration():
         return cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
 if __name__ == '__main__':
-    dc = DualCamCalibration(checkerboard_row=13, checkerboard_col=9, drawing_box_height=6, cam_type=('REALSENSE', 'ROS_TOPIC'), loadfilename=('calib_realsense.npz', 'calib_kinect_qhd.npz'))
+    dc = DualCamCalibration(checkerboard_row=13, checkerboard_col=9, drawing_box_height=6,
+                            cam_type=('REALSENSE', 'ROS_TOPIC'),
+                            loadfilename=('calibration_files/calib_realsense.npz', 'calibration_files/calib_kinect_qhd.npz'),
+                            savefilename='calibration_files/calib_dualcam.npz')

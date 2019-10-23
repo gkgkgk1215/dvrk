@@ -293,8 +293,63 @@ import numpy as np
 # Tmtx = np.vstack((np.hstack((a,t.T)), [0,0,0,1]))
 # print Tmtx
 
-a = 55.5555
-b = 44.4444
-c = 33.3333
-str = "%0.1f\n%0.1f\n%0.1f\n" % (a,b,c)
-print str
+# a = 55.5555
+# b = 44.4444
+# c = 33.3333
+# str = "%0.1f\n%0.1f\n%0.1f\n" % (a,b,c)
+# print str
+
+# import numpy as np
+# a = np.matrix([[1,2],[3,4]])
+# b = np.matrix([[-1,0.5],[1,1]])
+# print a*b
+
+# import numpy as np
+# Tc1c2 = np.matrix([[1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16]])
+# Rc1c2 = Tc1c2[0:3,0:3]
+# rvecsc1c2 = cv2.Rodrigues(Rc1c2)
+# tvecsc1c2 = Tc1c2[0:3,3]
+# print tvecsc1c2
+
+
+# import numpy as np
+# import cv2
+
+# mtx = [[], []]
+# dist = [[], []]
+# rvecs = [[], []]
+# tvecs = [[], []]
+# loadfilename = ('vision/calibration_files/calib_realsense.npz', 'vision/calibration_files/calib_kinect_qhd.npz', 'vision/calibration_files/calib_dualcam.npz')
+# for i in range(len(loadfilename)):
+#     with np.load(loadfilename[i]) as X:
+#         _, mtx[i], dist[i], _, _ = [X[n] for n in ('ret', 'mtx', 'dist', 'rvecs', 'tvecs')]
+#
+# print mtx[0]
+# fc1x = mtx[0][0][0]
+# fc1y = mtx[0][1][1]
+# cx1 = mtx[0][0][2]
+# cy1 = mtx[0][1][2]
+# print fc1x, fc1y, cx1, cy1
+
+# import numpy as np
+# loadfilename = ('vision/calibration_files/calib_zivid.npz')
+# with np.load(loadfilename) as X:
+#     _, mtx, dist, _, _ = [X[n] for n in ('ret', 'mtx', 'dist', 'rvecs', 'tvecs')]
+#
+# print mtx
+# print dist
+
+# D: [-0.2826650142669678, 0.42553916573524475, -0.0005135679966770113, -0.000839113024994731, -0.5215581655502319]
+# K: [2776.604248046875, 0.0, 952.436279296875, 0.0, 2776.226318359375, 597.9248046875, 0.0, 0.0, 1.0]
+# R: [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0]
+# P: [2776.604248046875, 0.0, 952.436279296875, 0.0, 0.0, 2776.226318359375, 597.9248046875, 0.0, 0.0, 0.0, 1.0, 0.0]
+#
+# ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
+# np.savez(self.__filename, ret=ret, mtx=mtx, dist=dist, rvecs=rvecs, tvecs=tvecs)
+
+# ret = []
+# rvecs = []
+# tvecs = []
+# mtx = np.array([[2776.604248046875, 0.0, 952.436279296875], [0.0, 2776.226318359375, 597.9248046875], [0.0, 0.0, 1.0]])
+# dist = np.array([-0.2826650142669678, 0.42553916573524475, -0.0005135679966770113, -0.000839113024994731, -0.5215581655502319])
+# np.savez('calib_zivid.npz', ret=ret, mtx=mtx, dist=dist, rvecs=rvecs, tvecs=tvecs)
