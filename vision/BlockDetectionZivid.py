@@ -1,7 +1,9 @@
 import cv2
-import rospy
-from sensor_msgs.msg import Image, CompressedImage
 from cv_bridge import CvBridge, CvBridgeError
+import rospy
+from sensor_msgs.msg import Image, CompressedImage, PointCloud2
+from sensor_msgs import point_cloud2 as pc2
+import ros_numpy
 import numpy as np
 
 class BlockDetectionZivid():
@@ -10,6 +12,8 @@ class BlockDetectionZivid():
         self.__bridge = CvBridge()
         self.__img_color = []
         self.__img_depth = []
+        self.__points_list = []
+        self.__points_ros_msg = PointCloud2()
 
         # load calibration data
         loadfilename = ('calibration_files/calib_zivid.npz')
@@ -17,8 +21,9 @@ class BlockDetectionZivid():
             _, self.__mtx, self.__dist, _, _ = [X[n] for n in ('ret', 'mtx', 'dist', 'rvecs', 'tvecs')]
 
         # ROS subscriber
-        rospy.Subscriber('/zivid_camera/color/image_color', Image, self.__img_color_cb)
+        rospy.Subscriber('/zivid_camera/color/image_color/compressed', CompressedImage, self.__img_color_cb)
         rospy.Subscriber('/zivid_camera/depth/image_raw', Image, self.__img_depth_cb)
+        # rospy.Subscriber('/zivid_camera/points', PointCloud2, self.__pcl_cb)  # not used in this time
 
         # create ROS node
         if not rospy.get_node_uri():
@@ -27,6 +32,8 @@ class BlockDetectionZivid():
         else:
             rospy.logdebug(rospy.get_caller_id() + ' -> ROS already initialized')
 
+        self.interval_ms = 30
+        self.rate = rospy.Rate(1000.0 / self.interval_ms)
         self.main()
 
     def __img_color_cb(self, data):
@@ -38,40 +45,26 @@ class BlockDetectionZivid():
         except CvBridgeError as e:
             print(e)
 
+    def __compressedimg2cv2(self, comp_data):
+        np_arr = np.fromstring(comp_data.data, np.uint8)
+        return cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+
     def __img_depth_cb(self, data):
         try:
             if type(data).__name__ == 'CompressedImage':
                 self.__img_depth = self.__compressedimg2cv2(data)
             elif type(data).__name__ == 'Image':
-                self.__img_depth = self.__bridge.imgmsg_to_cv2(data, "bgr8")
+                self.__img_depth = self.__bridge.imgmsg_to_cv2(data, "32FC1")
         except CvBridgeError as e:
             print(e)
 
-    def __compressedimg2cv2(self, comp_data):
-        np_arr = np.fromstring(comp_data.data, np.uint8)
-        return cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
-
-    def depth_to_3ch(self, d_img, cutoff_min, cutoff_max):
-        """Process depth images the same as in the ISRR 2019 paper.
-        Only applies if we're using depth images.
-        EDIT: actually we're going to add a min cutoff!
-        """
-        w, h = d_img.shape
-        n_img = np.zeros([w, h, 3])
-        d_img = d_img.flatten()
-
-        # Instead of this:
-        # d_img[d_img>cutoff] = 0.0
-        # Do this? The cutoff_max means beyond the cutoff, pixels become white.
-        # d_img[ d_img>cutoff_max ] = 0.0
-        d_img[d_img > cutoff_max] = cutoff_max
-        d_img[d_img < cutoff_min] = cutoff_min
-        print('max/min depth after cutoff: {:.3f} {:.3f}'.format(np.max(d_img), np.min(d_img)))
-
-        d_img = d_img.reshape([w, h])
-        for i in range(3):
-            n_img[:, :, i] = d_img
-        return n_img
+    def __pcl_cb(self, data):
+        pc = ros_numpy.numpify(data)
+        points = np.zeros((pc.shape[0], pc.shape[1], 3))
+        points[:, :, 0] = pc['x']
+        points[:, :, 1] = pc['y']
+        points[:, :, 2] = pc['z']
+        self.__points_list = points
 
     def main(self):
         try:
@@ -79,49 +72,23 @@ class BlockDetectionZivid():
                 if self.__img_color == [] or self.__img_depth == []:
                     pass
                 else:
-                    img_color = self.__img_color
-                    img_depth = self.__img_depth
+                    # Image cropping
+                    x=700; w=400
+                    y=150; h=300
+                    img_color = self.__img_color[y:y + h, x:x + w]
+                    img_depth = self.__img_depth[y:y + h, x:x + w]
 
-                    # Image crop
-                    x=440; w=400
-                    y=270; h=300
-                    img_color = img_color[y:y + h, x:x + w]
-                    img_depth = img_depth[y:y + h, x:x + w]
-
-                    print img_depth[160,160]
-
-                    # Thresholding by height
-                    cutoff_min = 0.8611 # close to the camera
-                    cutoff_max = 0.872  # farther from the camera
-                    img_depth[img_depth > cutoff_max] = 0
-                    img_depth[img_depth < cutoff_min] = 0
-
-                    # print img_depth
-
-                    # Color masking
-                    # hsv = cv2.cvtColor(img_color, cv2.COLOR_BGR2HSV)
-                    # lower_green = np.array([30, 80, 80])
-                    # upper_green = np.array([90, 255, 255])
-                    # lower_red = np.array([-20, 40, 40])
-                    # upper_red = np.array([20, 255, 255])
-
-                    # mask_green = cv2.inRange(hsv, lower_green, upper_green)
-                    # mask_red = cv2.inRange(hsv, lower_red, upper_red)
-                    # mask_red_morph = cv2.morphologyEx(mask_red, cv2.MORPH_OPEN, np.ones((4, 4), np.uint8))
-                    # mask_red_morph = cv2.morphologyEx(mask_red_morph, cv2.MORPH_CLOSE, np.ones((4, 4), np.uint8))
-
-                    # img_color = cv2.bitwise_and(img_color, img_color, mask=mask_green)
-                    # img_color = cv2.bitwise_and(img_color, img_color, mask=mask_red_morph)
-
-
+                    # Depth masking
+                    depth_min = np.array([0.868])
+                    depth_max = np.array([0.882])
+                    mask_block = cv2.inRange(img_depth, depth_min, depth_max)
+                    mask_block_morph = cv2.morphologyEx(mask_block, cv2.MORPH_OPEN, np.ones((4, 4), np.uint8))
+                    mask_block_morph = cv2.morphologyEx(mask_block_morph, cv2.MORPH_CLOSE, np.ones((4, 4), np.uint8))
+                    img_color = cv2.bitwise_and(img_color, img_color, mask=mask_block)
 
                     # Blurring
                     val = 5
-                    # blur = img
-                    # blur = cv2.blur(img, (val, val))
-                    # blur = cv2.GaussianBlur(img, (val, val), 0)
                     blur = cv2.medianBlur(img_color, val)
-                    # blur = cv2.bilateralFilter(img, 15, 100, 100)
                     gray = cv2.cvtColor(blur, cv2.COLOR_BGR2GRAY)
 
                     # CLAHE
@@ -153,7 +120,7 @@ class BlockDetectionZivid():
                     # cv2.drawContours(img1, contours[2], -1, (0, 0, 255), 3)
 
                     cv2.imshow("color", img_color)
-                    cv2.imshow("depth", img_depth)
+                    # cv2.imshow("depth", img_depth)
                     # cv2.imshow("blurred", blur)
                     # cv2.imshow("mask_green", res_green)
                     # cv2.imshow("mask_red", res_red)
@@ -166,6 +133,7 @@ class BlockDetectionZivid():
                     cv2.destroyAllWindows()
                     break
 
+                self.rate.sleep()
         finally:
             cv2.destroyAllWindows()
 
