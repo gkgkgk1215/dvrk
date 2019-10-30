@@ -1,3 +1,5 @@
+import numpy as np
+
 # import sys
 # sys.path.append('/home/hwangmh/pycharmprojects/dvrk_python/')
 # from dvrkArm import dvrkArm
@@ -10,7 +12,7 @@
 #     m.set_pose(pos_des, rot_des, 'deg')
 #
 
-# import numpy as np
+
 #
 # a = [1,2,3,4]
 # b = np.array([k/3.0 for k in a])
@@ -25,7 +27,7 @@
 #         norm=np.finfo(v.dtype).eps
 #     return v/norm
 #
-# import numpy as np
+
 #
 # a = [1,2,3,4]
 # b = [1,2,3,4]
@@ -55,7 +57,7 @@
 #
 # print np.array_equal(aa,bb)
 
-# import numpy as np
+
 #
 # a = np.array([[1,2],[3,4],[5,6]])
 # print a
@@ -117,7 +119,7 @@
 # p = pySwitch()
 # p.switch(2)
 
-# import numpy as np
+
 #
 # a = np.array(0, dtype=np.float)
 # a = []
@@ -141,7 +143,7 @@
 # import keyword
 # print keyword.kwlist
 
-# import numpy as np
+
 # a = []
 # a.append([])
 # a.append([])
@@ -164,7 +166,7 @@
 # print np.shape(a)
 # print np.shape(b)
 
-# import numpy as np
+
 # print np.pi
 
 # # import matplotlib.pyplot as plt
@@ -187,7 +189,7 @@
 #
 # print a
 
-# import numpy as np
+
 # a = [[1,2,3,4,5],[6,7,8,9,10],[11,12,13,14,15]]
 # print a[:2]
 # a = np.array(a)
@@ -195,13 +197,13 @@
 # b = [1,2,3,4,5,6]
 # print b[:3]
 
-# import numpy as np
+
 # a = np.mgrid[0:5,0:3]
 # print np.shape(a)
 # print a
 # print a[:,3,1]
 
-# import numpy as np
+
 # a = np.load('vision/calib_191010.npz')
 # print a['mtx']
 
@@ -210,7 +212,7 @@
 # for i in a:
 #     print i
 
-# import numpy as np
+
 # a = np.matrix([[1, 2, 3, 4], [5, 6, 7, 8]])
 # b = np.reshape(a, -1)
 # print a
@@ -218,7 +220,7 @@
 # print b
 # print b.shape
 
-# import numpy as np
+
 # row = 7
 # col = 5
 # objp = np.zeros((row*col, 3), np.float32)
@@ -242,7 +244,7 @@
 #         print "aa"
 #         break
 
-# import numpy as np
+
 # with np.load('vision/calib_kinect.npz') as X:
 #     ret, mtx, dist, _, _ = [X[i] for i in ('ret', 'mtx', 'dist', 'rvecs', 'tvecs')]
 #     print ret, mtx
@@ -251,7 +253,7 @@
 #     ret, mtx, dist, _, _ = [X[i] for i in ('ret', 'mtx', 'dist', 'rvecs', 'tvecs')]
 #     print ret, mtx
 
-# import numpy as np
+
 # a = (100,50)
 # print type(a)
 # b = tuple([100, 50])
@@ -268,26 +270,26 @@
 #
 # print __cam_type.index('ROS_TOPIC')
 
-import numpy as np
+
 # a = [[],[]]
 # a[0] = [1,2,3]
 # a[1] = [4,5,6]
 
-# import numpy as np
+
 # a = [1,2,3]
 # b = [4,5,6]
 # c = np.vstack((a,b))
 # print c
 # np.savetxt('testsave', c)
 
-# import numpy as np
+
 #
 # with np.load('vision/Dual_cam_calib.npz') as X:
 #     imgpoints1, imgpoints2 = [X[i] for i in ('imgpoints1', 'imgpoints2')]
 #     print imgpoints1
 #     print imgpoints2
 
-# import numpy as np
+
 # a = np.array([[1,2,3],[4,5,6],[7,8,9]])
 # t = np.array([11,12,13])[np.newaxis]
 # Tmtx = np.vstack((np.hstack((a,t.T)), [0,0,0,1]))
@@ -299,12 +301,12 @@ import numpy as np
 # str = "%0.1f\n%0.1f\n%0.1f\n" % (a,b,c)
 # print str
 
-# import numpy as np
+
 # a = np.matrix([[1,2],[3,4]])
 # b = np.matrix([[-1,0.5],[1,1]])
 # print a*b
 
-# import numpy as np
+
 # Tc1c2 = np.matrix([[1,2,3,4],[5,6,7,8],[9,10,11,12],[13,14,15,16]])
 # Rc1c2 = Tc1c2[0:3,0:3]
 # rvecsc1c2 = cv2.Rodrigues(Rc1c2)
@@ -312,7 +314,6 @@ import numpy as np
 # print tvecsc1c2
 
 
-# import numpy as np
 # import cv2
 
 # mtx = [[], []]
@@ -331,7 +332,7 @@ import numpy as np
 # cy1 = mtx[0][1][2]
 # print fc1x, fc1y, cx1, cy1
 
-# import numpy as np
+
 # loadfilename = ('vision/calibration_files/calib_zivid.npz')
 # with np.load(loadfilename) as X:
 #     _, mtx, dist, _, _ = [X[n] for n in ('ret', 'mtx', 'dist', 'rvecs', 'tvecs')]
@@ -353,3 +354,79 @@ import numpy as np
 # mtx = np.array([[2776.604248046875, 0.0, 952.436279296875], [0.0, 2776.226318359375, 597.9248046875], [0.0, 0.0, 1.0]])
 # dist = np.array([-0.2826650142669678, 0.42553916573524475, -0.0005135679966770113, -0.000839113024994731, -0.5215581655502319])
 # np.savez('calib_zivid.npz', ret=ret, mtx=mtx, dist=dist, rvecs=rvecs, tvecs=tvecs)
+
+
+# a = np.array([[5],[1],[2],[3],[10],[11]])
+# b = np.array([[2],[1],[2],[3],[1],[1]])
+# a[b>=2] = -1
+# print a
+
+# a = [1,2,3,4,5]
+# b = [1,3,5,7,9]
+# c = [1,1,1,1,1]
+# d = [x if c else y for c,x,y in zip(a,b,c)]
+# print d
+
+
+# import cv2
+# img = cv2.imread('img/hand.jpg', cv2.IMREAD_GRAYSCALE)
+# cv2.imshow("img", img)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
+# coordlist = np.argwhere(img<150)
+# print coordlist
+
+
+# a = np.array([[3,4],[1,2],[5,6]])
+# b = np.zeros((a.shape[0],1))
+# a = np.hstack((a,b))
+# print a
+
+# for i, name in enumerate(['body', 'foo', 'bar']):
+#     print (i,name)
+
+# from sklearn.neighbors import NearestNeighbors
+# X = np.array([[0, 0], [1, 1], [2, 2], [3,3]])
+# nbrs = NearestNeighbors(n_neighbors=3, algorithm='brute').fit(X)
+# distances, indices = nbrs.kneighbors(X)
+# print indices
+# print distances
+
+# a = [1,2]
+# b = np.array([-1,-2])
+# print a-b
+# print np.linalg.norm(a-b)
+
+# a = np.array([[1,2],[3,4],[5,6]])
+# b = [np.sqrt(x*x+y*y) for x,y in a]
+# print b
+
+# a = np.array([1,2,3,4,5,6,7,8,9,10])
+# b = np.argwhere(a>3)
+# print b
+
+# a = [-1,-1]
+# print np.arctan(a[1]/a[0])*180/np.pi
+# print np.cos(45*np.pi/180)
+
+# a = [2,5]
+# b = np.array([[2,3],[4,5]])
+# print np.matmul(b,a)
+
+# p1 = np.array([[1,2], [3,4]])
+# p2 = [[x,y] for y,x in p1]
+# print p2
+
+# print np.random.randint(10)
+
+# p1 = np.array([1,2])
+# p2 = np.array([3,4])
+# print np.linalg.norm(p1-p2)
+# print np.sqrt(4+4)
+
+# b = [2,1]
+# print np.arctan(1)*180/np.pi
+# print np.arctan(0.5)*180/np.pi
+
+import math
+print math.atan2(1,3)*180/np.pi

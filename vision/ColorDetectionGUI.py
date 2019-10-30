@@ -1,12 +1,12 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+##!/usr/bin/env python3
+## -*- coding: utf-8 -*-
 """
 Created on Tue Dec  4 01:41:32 2018
 @author: trio_pu
 """
 
 import sys
-sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages')
+# sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages')
 
 from PyQt5.QtGui import QImage, QPixmap
 from PyQt5.QtCore import QTimer

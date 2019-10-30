@@ -257,8 +257,8 @@ def imageBlending(imgfile1, imgfile2):
     cv2.destroyAllWindows()
 
 def bitOperation(hpos,vpos):
-    img1 = cv2.imread('img/IMAG0019_l.jpg')
-    img2 = cv2.imread('img/berkeley_logo.png')    # logo
+    img1 = cv2.imread('../img/IMAG0019_l.jpg')
+    img2 = cv2.imread('../img/berkeley_logo.png')    # logo
 
     # area selection to position the logo
     rows, cols, channels = img2.shape
@@ -728,7 +728,7 @@ def camShift():
 
 if __name__ == "__main__":
     # showImage()
-    showVideo()
+    # showVideo()
     # writeVideo()
     # drawing()
     # mouseBrush()
@@ -737,7 +737,7 @@ if __name__ == "__main__":
     # pixelSplit()
     # addImage('img/left_image_raw.png', 'img/right_image_raw.png')
     # imageBlending('img/left_image_raw.png', 'img/right_image_raw.png')
-    # bitOperation(800,10)
+    bitOperation(800,10)
     # hsv()
     # color_tracking()
     # thresholding()
