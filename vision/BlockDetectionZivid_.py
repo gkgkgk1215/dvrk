@@ -5,8 +5,9 @@ from sensor_msgs.msg import Image, CompressedImage, PointCloud2
 from sensor_msgs import point_cloud2 as pc2
 import ros_numpy
 import numpy as np
+import math
 import imageio, imutils
-from scipy.signal import correlate2d
+from scipy import signal
 
 class BlockDetectionZivid():
     def __init__(self):
@@ -84,7 +85,7 @@ class BlockDetectionZivid():
         coords = np.array([[p[0][0], p[0][1]] for p in cnt])
         coords_transformed = self.pnt_transform(coords, angle_deg, tx, ty)
         coords_transformed = coords_transformed.astype(int)
-        return np.reshape(coords_transformed, (coords_transformed.shape[0],1,2))
+        return np.reshape(coords_transformed, (coords_transformed.shape[0],1,2))\
 
     def overlayContour(self, img, img_template, angle_deg, pos_x, pos_y, color, thickness):
         img_transform = self.img_transform(img_template, angle_deg, 0,0)
@@ -92,69 +93,6 @@ class BlockDetectionZivid():
         _, contours, _ = cv2.findContours(edge.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         contours[0] += [pos_x-img_template.shape[0]/2, pos_y-img_template.shape[1]/2]
         cv2.drawContours(img, contours, -1, color, thickness)
-
-    def downsample_naive(self, img, downsample_factor):
-        """
-        Naively downsamples image without LPF.
-        """
-        new_img = img.copy()
-        new_img = new_img[::downsample_factor]
-        new_img = new_img[:, ::downsample_factor]
-        return new_img
-
-    def locate_block(self, img, mask=None, downsample_factor=4, correlated=None):
-        if len(img.shape) == 3:
-            img = img[:, :, 0]
-        if mask is None:
-            mask = np.load("mask.npy")
-
-        # TODO: downsample mask too
-        nonzero = (img > 0).astype(float)
-        nonzero = self.downsample_naive(nonzero, downsample_factor)
-        downsampled_mask = self.downsample_naive(mask, downsample_factor)
-        if correlated is None:
-            correlated = correlate2d(nonzero, downsampled_mask, mode='same')
-        best = np.array(np.unravel_index(correlated.argmax(), nonzero.shape)) * downsample_factor
-        best[0] -= mask.shape[0] // 2
-        best[1] -= mask.shape[1] // 2
-
-        new_img = np.zeros_like(img)
-        new_img[best[0]:best[0] + mask.shape[0], best[1]:best[1] + mask.shape[1]] = mask
-        return (best, correlated.max())
-
-    def find_N_largest(self, array, N, reference_column):
-        array_copy = array[:]
-        result = []
-        for i in range(N):
-            max = max(array_copy[:,reference_column])
-            result.append(array[max])
-            array_copy.remove(array[max])
-        return result
-
-    def get_masked_image(self, img, mask, start):
-        new_img = np.zeros_like(img)
-        new_img[start[0]:start[0] + mask.shape[0], start[1]:start[1] + mask.shape[1]] = mask
-        return np.multiply(new_img, img)
-
-    def rotate_mask(self, angle):
-        mask = np.load("mask.npy")
-        rotated = imutils.rotate_bound(mask, angle)
-        rotated[rotated > 0] = 1
-        return rotated
-
-    def find_masks(self, img, num_triangles):
-        masks = [self.rotate_mask(i) for i in np.r_[0:120:4]]
-        ret = []
-        angles = []
-        for mask in masks:
-            ret.append(self.locate_block(img, mask))
-        best_value = np.argmax([r[2] for r in ret])
-        angle = np.r_[0:120:4][best_value]
-        angles.append(angle)
-        print angles
-        # return angles,
-
-        # mask_im = self.get_masked_image(img, ret[best_value][1], ret[best_value][0])
 
     def main(self):
         try:
@@ -172,23 +110,67 @@ class BlockDetectionZivid():
                     img_blocks = cv2.inRange(img_depth, 0.868, 0.882)
                     pegs_masked = cv2.inRange(img_depth, 0.86, 0.87)
 
-                    self.find_masks(img_blocks, 12)
+                    ## PEG DETECTION
+                    val = 3
+                    blur_peg = cv2.medianBlur(pegs_masked, val)     # blurring peg image
+                    kernel = np.ones((2,2), np.uint8)
+                    erosion_peg = cv2.erode(blur_peg, kernel, iterations=2)     # erosion peg image
+                    corners = cv2.goodFeaturesToTrack(erosion_peg, 12, 0.1, 20)     # corner detection
+                    corners = np.int0(corners)
+                    pp = np.array([i.ravel() for i in corners])  # positions of pegs
+                    # pp[0] = [124,65]
+                    # pp[0] = 125,226
+                    for i in corners:       # draw red dots above pegs
+                        x,y = i.ravel()
+                        cv2.circle(img_color, (x,y), 3, (255, 255, 255), -1)
 
-                    # # Overlay contour
-                    # for i,res in enumerate(result):
-                    #     theta, x, y, _ = res
-                    #     img_transform = self.img_transform(block_template, theta, 0, 0)
-                    #     edge = cv2.Canny(img_transform, block_template.shape[0], block_template.shape[1])
-                    #     _, contours, _ = cv2.findContours(edge.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                    #     contours[0] += [pp[i][0]+x-block_template.shape[0]/2, pp[i][1]+y-block_template.shape[1]/2]
-                    #     cv2.drawContours(img_color, contours, -1, (0,255,0), 2)
+                    # Segmenting each block around peg
+                    dx = 70; dy = 70
+                    block = [img_blocks[c[1]-dy/2:c[1]+dy/2,c[0]-dx/2:c[0]+dx/2] for c in pp]
+
+                    # Importing a sample block
+                    block_template = cv2.imread('../img/block_sample.png', cv2.IMREAD_GRAYSCALE)
+                    # block_template = cv2.bitwise_not(block_template)
+                    block_template = cv2.resize(block_template, dsize=(dx, dy))
+
+                    result = [None]*np.shape(block)[0]
+                    x = np.r_[-20:20:5]
+                    y = np.r_[-20:20:5]
+                    theta = np.r_[0:120:10]
+                    for n, b in enumerate(block):
+                        n_max = 0
+                        for i,tx in enumerate(x):
+                            for j,ty in enumerate(y):
+                                for k,ang in enumerate(theta):
+                                    block_transform = self.img_transform(block_template,ang,tx,ty)
+                                    block_crossed = cv2.bitwise_and(b, b, mask=block_transform)
+                                    n_cross = np.shape(np.argwhere(block_crossed == 255))[0]
+                                    if n_cross > n_max:
+                                        n_max = n_cross
+                                        theta_final = ang
+                                        x_final = tx
+                                        y_final = ty
+
+                        result[n] = [theta_final, x_final, y_final, n_max]
+
+                    print result
+                    block_final = self.img_transform(block_template, theta_final, x_final, y_final)
+
+                    # Overlay contour
+                    for i,res in enumerate(result):
+                        theta, x, y, _ = res
+                        img_transform = self.img_transform(block_template, theta, 0, 0)
+                        edge = cv2.Canny(img_transform, block_template.shape[0], block_template.shape[1])
+                        _, contours, _ = cv2.findContours(edge.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                        contours[0] += [pp[i][0]+x-block_template.shape[0]/2, pp[i][1]+y-block_template.shape[1]/2]
+                        cv2.drawContours(img_color, contours, -1, (0,255,0), 2)
 
                     # self.overlayContour(img_color, block_template, theta_final, pp[0][0]+x_final, pp[0][1]+y_final, (0,255,0), 2)
                     cv2.imshow("img_color", img_color)
                     cv2.imshow("img_blocks", img_blocks)
-                    # cv2.imshow("block_segmented", block[0])
-                    # cv2.imshow("block_template", block_template)
-                    # cv2.imshow("block_final", block_final)
+                    cv2.imshow("block_segmented", block[0])
+                    cv2.imshow("block_template", block_template)
+                    cv2.imshow("block_final", block_final)
 
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     cv2.destroyAllWindows()

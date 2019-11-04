@@ -428,5 +428,64 @@ import numpy as np
 # print np.arctan(1)*180/np.pi
 # print np.arctan(0.5)*180/np.pi
 
-import math
-print math.atan2(1,3)*180/np.pi
+# import math
+# print math.atan2(1,3)*180/np.pi
+
+# print np.r_[0:120:4]
+
+# a = np.array([[2,3,4], [5,9,10]])
+# b = np.zeros_like(a)
+# print a
+# print b
+
+# np.unravel_index(correlated.argmax(), nonzero.shape)
+
+# print 10//3, 10%3
+
+# a = np.array([[1,2,3],[4,5,6],[10,8,9]])
+# print a, np.argmax(a)
+
+# pnt = [1,2]
+# a = [p for p in pnt]
+# print a
+
+# a = np.array([[1,2],[3,4],[5,6],[7,8]])
+# b = np.reshape(a, (4,1,2))
+# print b.shape, b
+
+# a = np.array([[[0,1,2],[1,2,2],[4,6,8]],[[5,3,3],[8,4,4],[10,9,10]],[[9,5,5],[10,6,6],[11,11,21]]])
+# print a.shape, a
+# print a[:,:,0]
+# print a[::2]
+# print a[:,::2]
+
+
+# a = np.array([[1,2,3], [4,5,6]])
+# b = (a<3).astype(float)
+# print b
+
+# angle = np.r_[0:120:4][10]
+# print angle
+
+# print range(1,12)
+
+# a = [[1,2,3,4], [5,6,7,8]]
+# b = [[9,2,3,4], [5,6,7,11]]
+# a.append(b)
+# print np.shape(a), a[2]
+
+def find_N_largest_row(array, N, ref_column):
+    copied = np.copy(array)
+    result = []
+    for i in range(N):
+        extract = copied[:, ref_column]
+        max_index = extract.argmax()
+        result.append(copied[max_index])
+        np.delete(copied, max_index)
+        print copied
+    return result
+
+a = [[1,10,3],[5,1,2],[19,20,1],[20,3,10]]
+find_N_largest_row(a,3,0)
+# print np.array(a)
+# print np.array(find_N_largest_row(a, 2, 0))

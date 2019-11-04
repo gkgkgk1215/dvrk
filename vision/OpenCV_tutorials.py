@@ -4,6 +4,9 @@ import cv2
 import matplotlib.pyplot as plt
 from random import shuffle
 import numpy as np
+from scipy import signal
+from scipy import misc
+import imutils
 
 """
 Image showing
@@ -49,7 +52,8 @@ def showVideo():
             break
 
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        cv2.imshow('video', gray)
+        rotated = imutils.rotate_bound(gray, 20)
+        cv2.imshow('video', rotated)
 
         key = cv2.waitKey(1) & 0xFF
         if key == 27:
@@ -725,10 +729,17 @@ def camShift():
     cap.release()
     cv2.destroyAllWindows()
 
+def correlated():
+    face = misc.face(gray=True) - misc.face(gray=True).mean()
+    template = np.copy(face[300:365, 670:750])  # right eye
+    template -= template.mean()
+    face = face + np.random.randn(*face.shape) * 50  # add noise
+    corr = signal.correlate2d(face, template, boundary='symm', mode='same')
+    y, x = np.unravel_index(np.argmax(corr), corr.shape)  # find the match
 
 if __name__ == "__main__":
     # showImage()
-    # showVideo()
+    showVideo()
     # writeVideo()
     # drawing()
     # mouseBrush()
@@ -737,7 +748,7 @@ if __name__ == "__main__":
     # pixelSplit()
     # addImage('img/left_image_raw.png', 'img/right_image_raw.png')
     # imageBlending('img/left_image_raw.png', 'img/right_image_raw.png')
-    bitOperation(800,10)
+    # bitOperation(800,10)
     # hsv()
     # color_tracking()
     # thresholding()
@@ -756,3 +767,4 @@ if __name__ == "__main__":
     # hough()
     # watershed()
     # camShift()
+    correlated()
