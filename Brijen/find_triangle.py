@@ -24,12 +24,13 @@ def locate_block(img, mask=None, downsample_factor=4, correlated=None):
 	if correlated is None:
 		correlated = correlate2d(nonzero, downsampled_mask, mode='same')
 	best = np.array(np.unravel_index(correlated.argmax(), nonzero.shape)) * downsample_factor
+	best_args = np.copy(best)
 	best[0] -= mask.shape[0]//2
 	best[1] -= mask.shape[1]//2
 
 	new_img = np.zeros_like(img)
 	new_img[best[0]:best[0] + mask.shape[0],best[1]:best[1] + mask.shape[1]] = mask
-	return (best, mask, correlated.max(), correlated)
+	return (best, mask, correlated.max(), correlated, best_args)
 
 def render_mask(img, mask, start):
 	new_img = np.zeros_like(img)
@@ -63,11 +64,15 @@ def find_masks(img, num_triangles):
 	masks = [rotate_mask(i) for i in np.r_[0:120:4]]
 	ret = []
 	angles = []
+	best_args = []
 	for mask in masks:
 		ret.append(locate_block(img, mask))
 	best_value = np.argmax([r[2] for r in ret])
 	angle = np.r_[0:120:4][best_value]
 	angles.append(angle)
+	best_arg = ret[best_value][4]
+	best_args.append(best_arg)
+
 	mask_im = get_masked_image(img, ret[best_value][1], ret[best_value][0])
 	# print(ret[best_value][0])
 	# plt.imshow(mask_im); plt.show()
@@ -81,12 +86,14 @@ def find_masks(img, num_triangles):
 		best_value = np.argmax([r[2] for r in ret])
 		angle = np.r_[0:120:4][best_value]
 		angles.append(angle)
+		best_arg = ret[best_value][4]
+		best_args.append(best_arg)
 		mask_im = get_masked_image(img, ret[best_value][1], ret[best_value][0])
 		# print(ret[best_value][0])
 		np.save("mask%d.npy"%j, mask_im)
 	corr = [zero_correlated(r[3], ret[best_value][0], ret[best_value][1]) for r in ret]
 	np.save("angles.npy", np.array(angles))
-
+	print best_args
 
 if __name__ == '__main__':
 	file_name = "../img/block_masked.png"

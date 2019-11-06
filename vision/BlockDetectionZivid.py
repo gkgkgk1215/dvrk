@@ -5,8 +5,8 @@ from sensor_msgs.msg import Image, CompressedImage, PointCloud2
 from sensor_msgs import point_cloud2 as pc2
 import ros_numpy
 import numpy as np
-import imageio, imutils
 from scipy.signal import correlate2d
+import imageio, imutils
 
 class BlockDetectionZivid():
     def __init__(self):
@@ -68,24 +68,6 @@ class BlockDetectionZivid():
         points[:, :, 2] = pc['z']
         self.__points_list = points
 
-    def img_transform(self, img, angle_deg, tx, ty):
-        M_rot = cv2.getRotationMatrix2D((img.shape[0] / 2, img.shape[1] / 2), angle_deg, 1)
-        M_tran = np.float32([[1, 0, tx], [0, 1, ty]])
-        img = cv2.warpAffine(img, M_rot, (img.shape[0], img.shape[1]))
-        rotated = cv2.warpAffine(img, M_tran, (img.shape[0], img.shape[1]))
-        return rotated
-
-    def pnt_transform(self, pnts, angle_deg, tx, ty):
-        R = cv2.getRotationMatrix2D((0, 0), -angle_deg, 1)[:,:2]
-        T = np.array([tx, ty])
-        return np.array([np.array(np.matmul(R, p) + T) for p in pnts])
-
-    def cnt_transform(self, cnt, angle_deg, tx, ty):
-        coords = np.array([[p[0][0], p[0][1]] for p in cnt])
-        coords_transformed = self.pnt_transform(coords, angle_deg, tx, ty)
-        coords_transformed = coords_transformed.astype(int)
-        return np.reshape(coords_transformed, (coords_transformed.shape[0],1,2))
-
     def overlayContour(self, img, img_template, angle_deg, pos_x, pos_y, color, thickness):
         img_transform = self.img_transform(img_template, angle_deg, 0,0)
         edge = cv2.Canny(img_transform, img_template.shape[0], img_template.shape[1])
@@ -105,9 +87,8 @@ class BlockDetectionZivid():
     def locate_block(self, img, mask=None, downsample_factor=4, correlated=None):
         if len(img.shape) == 3:
             img = img[:, :, 0]
-        if mask is None:
-            mask = np.load("mask.npy")
-
+        # if mask is None:
+        #     mask = np.load("mask.npy")
         # TODO: downsample mask too
         nonzero = (img > 0).astype(float)
         nonzero = self.downsample_naive(nonzero, downsample_factor)
@@ -115,26 +96,26 @@ class BlockDetectionZivid():
         if correlated is None:
             correlated = correlate2d(nonzero, downsampled_mask, mode='same')
         best = np.array(np.unravel_index(correlated.argmax(), nonzero.shape)) * downsample_factor
+        best_args = np.copy(best)
         best[0] -= mask.shape[0] // 2
         best[1] -= mask.shape[1] // 2
 
         new_img = np.zeros_like(img)
         new_img[best[0]:best[0] + mask.shape[0], best[1]:best[1] + mask.shape[1]] = mask
-        return (best, correlated.max())
-
-    def find_N_largest(self, array, N, reference_column):
-        array_copy = array[:]
-        result = []
-        for i in range(N):
-            max = max(array_copy[:,reference_column])
-            result.append(array[max])
-            array_copy.remove(array[max])
-        return result
+        return (best, mask, correlated.max(), correlated, best_args)
 
     def get_masked_image(self, img, mask, start):
         new_img = np.zeros_like(img)
         new_img[start[0]:start[0] + mask.shape[0], start[1]:start[1] + mask.shape[1]] = mask
         return np.multiply(new_img, img)
+
+    def zero_correlated(self, correlated, start, mask, downsample_factor=4):
+        start_downsampled = start // downsample_factor
+        buffer_scale = 1.2
+        downsampled_mask = self.downsample_naive(mask, downsample_factor)
+        correlated[start_downsampled[0]:start_downsampled[0] + int(downsampled_mask.shape[0] * buffer_scale),
+        start_downsampled[1]:start_downsampled[1] + int(downsampled_mask.shape[1] * buffer_scale)] = 0
+        return correlated
 
     def rotate_mask(self, angle):
         mask = np.load("mask.npy")
@@ -146,15 +127,36 @@ class BlockDetectionZivid():
         masks = [self.rotate_mask(i) for i in np.r_[0:120:4]]
         ret = []
         angles = []
+        best_args = []
         for mask in masks:
             ret.append(self.locate_block(img, mask))
         best_value = np.argmax([r[2] for r in ret])
         angle = np.r_[0:120:4][best_value]
         angles.append(angle)
-        print angles
-        # return angles,
+        best_arg = ret[best_value][4]
+        best_args.append(best_arg)
 
-        # mask_im = self.get_masked_image(img, ret[best_value][1], ret[best_value][0])
+        mask_im = self.get_masked_image(img, ret[best_value][1], ret[best_value][0])
+        # print(ret[best_value][0])
+        # plt.imshow(mask_im); plt.show()
+        # np.save("mask%d.npy"%0, mask_im)
+
+        for j in range(1, num_triangles):
+            corr = [self.zero_correlated(r[3], ret[best_value][0], ret[best_value][1]) for r in ret]
+            ret = []
+            for i, mask in enumerate(masks):
+                ret.append(self.locate_block(img, mask, correlated=corr[i]))
+            best_value = np.argmax([r[2] for r in ret])
+            angle = np.r_[0:120:4][best_value]
+            angles.append(angle)
+            best_arg = ret[best_value][4]
+            best_args.append(best_arg)
+            mask_im = self.get_masked_image(img, ret[best_value][1], ret[best_value][0])
+            # print(ret[best_value][0])
+            np.save("mask%d.npy" % j, mask_im)
+        corr = [self.zero_correlated(r[3], ret[best_value][0], ret[best_value][1]) for r in ret]
+        # np.save("angles.npy", np.array(angles))
+        return angles, best_args
 
     def main(self):
         try:
@@ -172,7 +174,10 @@ class BlockDetectionZivid():
                     img_blocks = cv2.inRange(img_depth, 0.868, 0.882)
                     pegs_masked = cv2.inRange(img_depth, 0.86, 0.87)
 
-                    self.find_masks(img_blocks, 12)
+                    angles, args = self.find_masks(img_blocks, 12)
+
+                    for p in args:
+                        cv2.circle(img_color, (p[1], p[0]), 3, (0, 0, 255), -1)
 
                     # # Overlay contour
                     # for i,res in enumerate(result):

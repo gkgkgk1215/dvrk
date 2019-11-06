@@ -737,9 +737,17 @@ def correlated():
     corr = signal.correlate2d(face, template, boundary='symm', mode='same')
     y, x = np.unravel_index(np.argmax(corr), corr.shape)  # find the match
 
+def rotate_image():
+    mask = cv2.imread('../img/block_sample.png')
+    print mask.shape
+    rotated = imutils.rotate_bound(mask, 40)
+    print rotated.shape
+    cv2.imshow("aa", rotated)
+    cv2.waitKey(0)
+
 if __name__ == "__main__":
     # showImage()
-    showVideo()
+    # showVideo()
     # writeVideo()
     # drawing()
     # mouseBrush()
@@ -767,4 +775,5 @@ if __name__ == "__main__":
     # hough()
     # watershed()
     # camShift()
-    correlated()
+    # correlated()
+    rotate_image()

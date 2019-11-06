@@ -474,18 +474,64 @@ import numpy as np
 # a.append(b)
 # print np.shape(a), a[2]
 
-def find_N_largest_row(array, N, ref_column):
-    copied = np.copy(array)
-    result = []
-    for i in range(N):
-        extract = copied[:, ref_column]
-        max_index = extract.argmax()
-        result.append(copied[max_index])
-        np.delete(copied, max_index)
-        print copied
-    return result
-
-a = [[1,10,3],[5,1,2],[19,20,1],[20,3,10]]
-find_N_largest_row(a,3,0)
+# def find_N_largest_row(array, N, ref_column):
+#     copied = np.copy(array)
+#     result = []
+#     for i in range(N):
+#         extract = copied[:, ref_column]
+#         max_index = extract.argmax()
+#         result.append(copied[max_index])
+#         copied = np.delete(copied, max_index, axis=0)
+#     return result
+#
+# a = np.array([[1,10,3],[5,1,2],[19,20,1],[20,3,10]])
 # print np.array(a)
-# print np.array(find_N_largest_row(a, 2, 0))
+# print np.array(find_N_largest_row(a, 3, 2))
+
+# in_arr = np.array([ 2, 0,  1, 5, 4, 1, 9])
+# out_arr = np.argsort(in_arr)
+# in_arr_sorted = in_arr[out_arr]
+# print in_arr
+# print out_arr
+# print in_arr_sorted
+
+# a = np.array([[1,10,3],[5,1,2],[19,20,1],[20,3,10]])
+# print a
+# ind = np.argsort(a, axis=0)  # sorts along first axis (down)
+# print ind
+# print np.take_along_axis(a, ind, axis=0)  # same as np.sort(x, axis=0)
+
+# input array
+# in_arr = np.array([21, 100, 112, 51, 4, 8, 10,9,11])
+# print in_arr
+# out_arr = np.partition(in_arr, 5)
+# print out_arr
+# index_arr = np.argpartition(in_arr,5)
+# print index_arr
+
+# a = np.array([[1,10,3],[5,1,2],[19,20,1],[20,3,10],[44,45,100]])
+#
+# def find_N_largest(array, N):
+#     array_ravel = array.ravel()
+#     result = -np.partition(-array_ravel, N)[:N]
+#
+#     result_args = np.argpartition(-array_ravel, N)[:N]
+#     result_args = np.transpose(np.unravel_index(result_args, array.shape))
+#     return (result, result_args)
+#
+# print a
+# print find_N_largest(a, 6)
+#
+# def find_N_largest_row(array, N, ref_column):
+#     copied = np.copy(array)
+#     result = []
+#     for i in range(N):
+#         extract = copied[:, ref_column]
+#         max_index = extract.argmax()
+#         result.append(copied[max_index])
+#         copied = np.delete(copied, max_index, axis=0)
+#     return result
+
+# best_value = [0,1,2,3]
+# angle = np.r_[0:120:4][best_value]
+# print angle
