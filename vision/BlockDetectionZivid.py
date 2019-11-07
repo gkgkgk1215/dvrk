@@ -6,7 +6,7 @@ from sensor_msgs import point_cloud2 as pc2
 import ros_numpy
 import numpy as np
 from scipy.signal import correlate2d
-import imageio, imutils
+import imutils
 
 class BlockDetectionZivid():
     def __init__(self):
@@ -68,13 +68,6 @@ class BlockDetectionZivid():
         points[:, :, 2] = pc['z']
         self.__points_list = points
 
-    def overlayContour(self, img, img_template, angle_deg, pos_x, pos_y, color, thickness):
-        img_transform = self.img_transform(img_template, angle_deg, 0,0)
-        edge = cv2.Canny(img_transform, img_template.shape[0], img_template.shape[1])
-        _, contours, _ = cv2.findContours(edge.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        contours[0] += [pos_x-img_template.shape[0]/2, pos_y-img_template.shape[1]/2]
-        cv2.drawContours(img, contours, -1, color, thickness)
-
     def downsample_naive(self, img, downsample_factor):
         """
         Naively downsamples image without LPF.
@@ -87,9 +80,8 @@ class BlockDetectionZivid():
     def locate_block(self, img, mask=None, downsample_factor=4, correlated=None):
         if len(img.shape) == 3:
             img = img[:, :, 0]
-        # if mask is None:
-        #     mask = np.load("mask.npy")
-        # TODO: downsample mask too
+        if mask is None:
+            mask = np.load("mask.npy")
         nonzero = (img > 0).astype(float)
         nonzero = self.downsample_naive(nonzero, downsample_factor)
         downsampled_mask = self.downsample_naive(mask, downsample_factor)
@@ -99,10 +91,7 @@ class BlockDetectionZivid():
         best_args = np.copy(best)
         best[0] -= mask.shape[0] // 2
         best[1] -= mask.shape[1] // 2
-
-        new_img = np.zeros_like(img)
-        new_img[best[0]:best[0] + mask.shape[0], best[1]:best[1] + mask.shape[1]] = mask
-        return (best, mask, correlated.max(), correlated, best_args)
+        return (best, mask, correlated.max(), correlated)
 
     def get_masked_image(self, img, mask, start):
         new_img = np.zeros_like(img)
@@ -111,7 +100,7 @@ class BlockDetectionZivid():
 
     def zero_correlated(self, correlated, start, mask, downsample_factor=4):
         start_downsampled = start // downsample_factor
-        buffer_scale = 1.2
+        buffer_scale = 1.0
         downsampled_mask = self.downsample_naive(mask, downsample_factor)
         correlated[start_downsampled[0]:start_downsampled[0] + int(downsampled_mask.shape[0] * buffer_scale),
         start_downsampled[1]:start_downsampled[1] + int(downsampled_mask.shape[1] * buffer_scale)] = 0
@@ -133,13 +122,8 @@ class BlockDetectionZivid():
         best_value = np.argmax([r[2] for r in ret])
         angle = np.r_[0:120:4][best_value]
         angles.append(angle)
-        best_arg = ret[best_value][4]
+        best_arg = ret[best_value][0]
         best_args.append(best_arg)
-
-        mask_im = self.get_masked_image(img, ret[best_value][1], ret[best_value][0])
-        # print(ret[best_value][0])
-        # plt.imshow(mask_im); plt.show()
-        # np.save("mask%d.npy"%0, mask_im)
 
         for j in range(1, num_triangles):
             corr = [self.zero_correlated(r[3], ret[best_value][0], ret[best_value][1]) for r in ret]
@@ -149,14 +133,24 @@ class BlockDetectionZivid():
             best_value = np.argmax([r[2] for r in ret])
             angle = np.r_[0:120:4][best_value]
             angles.append(angle)
-            best_arg = ret[best_value][4]
+            best_arg = ret[best_value][0]
             best_args.append(best_arg)
-            mask_im = self.get_masked_image(img, ret[best_value][1], ret[best_value][0])
-            # print(ret[best_value][0])
-            np.save("mask%d.npy" % j, mask_im)
-        corr = [self.zero_correlated(r[3], ret[best_value][0], ret[best_value][1]) for r in ret]
-        # np.save("angles.npy", np.array(angles))
         return angles, best_args
+
+    def overlay_contour(self, img, x,y,angle, color):
+        contour = np.load("contour.npy")
+        rotated = imutils.rotate_bound(contour, angle)
+        args_local = np.argwhere(rotated)
+        args = np.array([[x+p[0], y+p[1]] for p in args_local])
+        for n in args:
+            img[n[0]][n[1]] = list(color)
+
+    def change_color(self, img, color):
+        colored = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
+        args = np.argwhere(colored)
+        for n in args:
+            colored[n[0]][n[1]] = list(color)
+        return colored
 
     def main(self):
         try:
@@ -171,26 +165,21 @@ class BlockDetectionZivid():
                     img_depth = self.__img_depth[y:y + h, x:x + w]
 
                     # Depth masking: thresholding by depth to find blocks & pegs
-                    img_blocks = cv2.inRange(img_depth, 0.868, 0.882)
+                    blocks_masked = cv2.inRange(img_depth, 0.872, 0.882)
                     pegs_masked = cv2.inRange(img_depth, 0.86, 0.87)
 
-                    angles, args = self.find_masks(img_blocks, 12)
+                    angles, args = self.find_masks(blocks_masked, 12)
 
-                    for p in args:
-                        cv2.circle(img_color, (p[1], p[0]), 3, (0, 0, 255), -1)
+                    blocks_masked_colored = self.change_color(blocks_masked, (0,255,255))   # yellow color on blocks
+                    # blocks_masked_colored[blocks_masked_colored==255] = [0, 100, 100]  # yellow color on blocks
 
-                    # # Overlay contour
-                    # for i,res in enumerate(result):
-                    #     theta, x, y, _ = res
-                    #     img_transform = self.img_transform(block_template, theta, 0, 0)
-                    #     edge = cv2.Canny(img_transform, block_template.shape[0], block_template.shape[1])
-                    #     _, contours, _ = cv2.findContours(edge.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                    #     contours[0] += [pp[i][0]+x-block_template.shape[0]/2, pp[i][1]+y-block_template.shape[1]/2]
-                    #     cv2.drawContours(img_color, contours, -1, (0,255,0), 2)
+                    for p,theta in zip(args, angles):
+                        self.overlay_contour(blocks_masked_colored, p[0],p[1], theta, (0,255,0))
 
-                    # self.overlayContour(img_color, block_template, theta_final, pp[0][0]+x_final, pp[0][1]+y_final, (0,255,0), 2)
-                    cv2.imshow("img_color", img_color)
-                    cv2.imshow("img_blocks", img_blocks)
+                    cv2.imshow("original", img_color)
+                    cv2.imshow("blocks", blocks_masked)
+                    cv2.imshow("pegs", pegs_masked)
+                    cv2.imshow("blocks_contour", blocks_masked_colored)
                     # cv2.imshow("block_segmented", block[0])
                     # cv2.imshow("block_template", block_template)
                     # cv2.imshow("block_final", block_final)

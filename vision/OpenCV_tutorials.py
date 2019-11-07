@@ -745,6 +745,14 @@ def rotate_image():
     cv2.imshow("aa", rotated)
     cv2.waitKey(0)
 
+def scaling_image():
+    mask = cv2.imread('../img/block_sample.png')
+    height, width = mask.shape[:2]
+    print height, width, (int)(1.0*width), (int)(1.0*height)
+    downsized = cv2.resize(mask, ((int)(0.5*width), (int)(0.5*height)), interpolation=cv2.INTER_CUBIC)
+    cv2.imshow("downsizing", downsized)
+    cv2.waitKey(0)
+
 if __name__ == "__main__":
     # showImage()
     # showVideo()
@@ -774,6 +782,7 @@ if __name__ == "__main__":
     # tmpMatching()
     # hough()
     # watershed()
-    # camShift()
+    camShift()
     # correlated()
-    rotate_image()
+    # rotate_image()
+    # scaling_image()
