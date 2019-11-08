@@ -4,7 +4,6 @@ import sys
 import numpy as np
 from os import path
 
-
 ESC_KEYS = [27, 1048603]
 MILLION = float(10**6)
 
