@@ -521,7 +521,7 @@ import numpy as np
 #
 # print a
 # print find_N_largest(a, 6)
-#
+
 # def find_N_largest_row(array, N, ref_column):
 #     copied = np.copy(array)
 #     result = []
@@ -535,3 +535,4 @@ import numpy as np
 # best_value = [0,1,2,3]
 # angle = np.r_[0:120:4][best_value]
 # print angle
+

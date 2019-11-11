@@ -17,6 +17,10 @@ class BlockDetectionZivid():
         self.__points_list = []
         self.__points_ros_msg = PointCloud2()
 
+        self.__mask = []
+        self.__contour = []
+        self.__grasping_points = []
+
         # load calibration data
         loadfilename = ('calibration_files/calib_zivid.npz')
         with np.load(loadfilename) as X:
@@ -68,6 +72,32 @@ class BlockDetectionZivid():
         points[:, :, 2] = pc['z']
         self.__points_list = points
 
+    def load_mask(self, filename):
+        img = cv2.imread(filename)
+        ret, mask_inv = cv2.threshold(img, 10, 255, cv2.THRESH_BINARY)
+        mask = cv2.bitwise_not(mask_inv)
+        mask = mask[:, :, 0]
+        return mask
+
+    def load_contour(self, filename):
+        img = cv2.imread(filename, cv2.IMREAD_GRAYSCALE)
+        ret, mask = cv2.threshold(img, 10, 255, cv2.THRESH_BINARY)
+        edge = cv2.Canny(img, mask.shape[0], mask.shape[1])
+        _, cnts, _ = cv2.findContours(edge.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+        contour = np.zeros_like(img)
+        cv2.drawContours(contour, cnts, -1, (255, 255, 255), 2)
+        return contour
+
+    def load_grasping_points(self, filename):
+        contour = self.load_contour(filename)
+        grasping_points = cv2.cvtColor(contour, cv2.COLOR_GRAY2BGR)
+
+        # red dots on grasping point
+        grasping_points[25][15] = [0, 0, 255]
+        grasping_points[25][40] = [0, 0, 255]
+        grasping_points[45][27] = [0, 0, 255]
+        return grasping_points
+
     def downsample_naive(self, img, downsample_factor):
         """
         Naively downsamples image without LPF.
@@ -107,8 +137,7 @@ class BlockDetectionZivid():
         return correlated
 
     def rotate_mask(self, angle):
-        mask = np.load("mask.npy")
-        rotated = imutils.rotate_bound(mask, angle)
+        rotated = imutils.rotate_bound(self.__mask, angle)
         rotated[rotated > 0] = 1
         return rotated
 
@@ -138,12 +167,12 @@ class BlockDetectionZivid():
         return angles, best_args
 
     def overlay_contour(self, img, x,y,angle, color):
-        contour = np.load("contour.npy")
-        rotated = imutils.rotate_bound(contour, angle)
+        rotated = imutils.rotate_bound(self.__contour, angle)
         args_local = np.argwhere(rotated)
         args = np.array([[x+p[0], y+p[1]] for p in args_local])
         for n in args:
-            img[n[0]][n[1]] = list(color)
+            if n[0] < img.shape[0] and n[1] < img.shape[1]:
+                img[n[0]][n[1]] = list(color)
 
     def change_color(self, img, color):
         colored = cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)
@@ -154,6 +183,10 @@ class BlockDetectionZivid():
 
     def main(self):
         try:
+            filename = '../img/block_sample_drawing.png'
+            self.__mask = self.load_mask(filename)
+            self.__contour = self.load_contour(filename)
+            self.__grasping_points = self.load_grasping_points(filename)
             while True:
                 if self.__img_color == [] or self.__img_depth == []:
                     pass
@@ -169,20 +202,15 @@ class BlockDetectionZivid():
                     pegs_masked = cv2.inRange(img_depth, 0.86, 0.87)
 
                     angles, args = self.find_masks(blocks_masked, 12)
-
                     blocks_masked_colored = self.change_color(blocks_masked, (0,255,255))   # yellow color on blocks
-                    # blocks_masked_colored[blocks_masked_colored==255] = [0, 100, 100]  # yellow color on blocks
 
                     for p,theta in zip(args, angles):
-                        self.overlay_contour(blocks_masked_colored, p[0],p[1], theta, (0,255,0))
+                        self.overlay_contour(blocks_masked_colored, p[0], p[1], theta, (0, 255, 0))
 
                     cv2.imshow("original", img_color)
                     cv2.imshow("blocks", blocks_masked)
                     cv2.imshow("pegs", pegs_masked)
                     cv2.imshow("blocks_contour", blocks_masked_colored)
-                    # cv2.imshow("block_segmented", block[0])
-                    # cv2.imshow("block_template", block_template)
-                    # cv2.imshow("block_final", block_final)
 
                 if cv2.waitKey(1) & 0xFF == ord('q'):
                     cv2.destroyAllWindows()

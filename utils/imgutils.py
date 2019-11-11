@@ -14,7 +14,6 @@ def pnt_transform(pnts, angle_deg, tx, ty):
     T = np.array([tx, ty])
     return np.array([np.array(np.matmul(R, p) + T) for p in pnts])
 
-
 def cnt_transform(cnt, angle_deg, tx, ty):
     coords = np.array([[p[0][0], p[0][1]] for p in cnt])
     coords_transformed = pnt_transform(coords, angle_deg, tx, ty)
