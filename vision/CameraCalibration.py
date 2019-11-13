@@ -33,7 +33,7 @@ class CameraCalibration():
             self.pipeline.start(self.config)
         elif self.__cam_type == 'ROS_TOPIC':
             # ROS subscriber
-            rospy.Subscriber('/kinect2/qhd/image_color', Image, self.__img_raw_cam_cb)
+            rospy.Subscriber('/zivid_camera/color/image_color/compressed', CompressedImage, self.__img_raw_cam_cb)
             # create ROS node
             if not rospy.get_node_uri():
                 rospy.init_node('Image_pipeline_node', anonymous=True, log_level=rospy.WARN)
@@ -88,6 +88,8 @@ class CameraCalibration():
                             cnt += 1
                             objpoints.append(objp)
                             imgpoints.append(corners2)
+                            # np.save("corners_8x6", imgpoints)
+                            print imgpoints
                             print ("Corner captured: %d trials" % (cnt))
                         else:
                             print ("Corner not captured, try again")
@@ -113,15 +115,23 @@ class CameraCalibration():
     def __img_raw_cam_cb(self, data):
         try:
             if type(data).__name__ == 'CompressedImage':
-                self.__img_raw_cam = self.__compressedimg2cv2(data)
+                img_raw = self.__compressedimg2cv2(data)
             elif type(data).__name__ == 'Image':
-                self.__img_raw_cam = self.__bridge.imgmsg_to_cv2(data, "bgr8")
+                img_raw = self.__bridge.imgmsg_to_cv2(data, "bgr8")
+            self.__img_raw_cam = self.__img_crop(img_raw)
         except CvBridgeError as e:
             print(e)
+
+    def __img_crop(self, img):
+        # Image cropping
+        x = 650; w = 520
+        y = 50; h = 400
+        cropped = img[y:y + h, x:x + w]
+        return cropped
 
     def __compressedimg2cv2(self, comp_data):
         np_arr = np.fromstring(comp_data.data, np.uint8)
         return cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
 if __name__ == '__main__':
-    cc = CameraCalibration(checkerboard_row=13, checkerboard_col=9, cam_type='USB', savefilename='calib.npz')
+    cc = CameraCalibration(checkerboard_row=8, checkerboard_col=6, cam_type='ROS_TOPIC', savefilename='calib_zivid.npz')

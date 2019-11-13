@@ -127,7 +127,7 @@ g = [i for i in range(256)]
 r = [i for i in range(256)]
 
 def onMouse(event, x,y, flags, param):
-    if event == cv2.EVENT_LBUTTONDBLCLK:
+    if event == cv2.EVENT_LBUTTOnNDBLCLK:
         shuffle(b), shuffle(g), shuffle(r)
         cv2.circle(param, (x,y), 50, (b[0],g[0],r[0]), -1)
 

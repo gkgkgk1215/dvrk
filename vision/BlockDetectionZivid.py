@@ -24,18 +24,13 @@ class BlockDetectionZivid():
         self.__theta = np.r_[-60:60:4]
         self.__x = np.r_[-15:15:5]
         self.__y = np.r_[-15:15:5]
+        self.__corners = np.load('../calibration_files/corners_8x6.npy')
 
         # load mask
         filename = '../img/block_sample_drawing3.png'
         self.__mask = self.load_mask(filename, self.__dx, self.__dy)
         self.__mask_transformed = self.transform_mask(self.__mask)
         self.__contour = self.load_contour(self.__mask, 2)
-        # self.__grasping_points = self.load_grasping_points(filename)
-
-        # load calibration data
-        loadfilename = ('calibration_files/calib_zivid.npz')
-        with np.load(loadfilename) as X:
-            _, self.__mtx, self.__dist, _, _ = [X[n] for n in ('ret', 'mtx', 'dist', 'rvecs', 'tvecs')]
 
         # ROS subscriber
         rospy.Subscriber('/zivid_camera/color/image_color/compressed', CompressedImage, self.__img_color_cb)
@@ -56,9 +51,10 @@ class BlockDetectionZivid():
     def __img_color_cb(self, data):
         try:
             if type(data).__name__ == 'CompressedImage':
-                self.__img_color = self.__compressedimg2cv2(data)
+                img_raw = self.__compressedimg2cv2(data)
             elif type(data).__name__ == 'Image':
-                self.__img_color = self.__bridge.imgmsg_to_cv2(data, "bgr8")
+                img_raw = self.__bridge.imgmsg_to_cv2(data, "bgr8")
+            self.__img_color = self.__img_crop(img_raw)
         except CvBridgeError as e:
             print(e)
 
@@ -69,9 +65,10 @@ class BlockDetectionZivid():
     def __img_depth_cb(self, data):
         try:
             if type(data).__name__ == 'CompressedImage':
-                self.__img_depth = self.__compressedimg2cv2(data)
+                img_raw = self.__compressedimg2cv2(data)
             elif type(data).__name__ == 'Image':
-                self.__img_depth = self.__bridge.imgmsg_to_cv2(data, "32FC1")
+                img_raw = self.__bridge.imgmsg_to_cv2(data, "32FC1")
+            self.__img_depth = self.__img_crop(img_raw)
         except CvBridgeError as e:
             print(e)
 
@@ -82,6 +79,19 @@ class BlockDetectionZivid():
         points[:, :, 1] = pc['y']
         points[:, :, 2] = pc['z']
         self.__points_list = points
+
+    def __img_crop(self, img):
+        # Image cropping
+        x = 650; w = 520
+        y = 50; h = 400
+        cropped = img[y:y + h, x:x + w]
+        return cropped
+
+    def load_intrinsics(self, filename):
+        # load calibration data
+        with np.load(filename) as X:
+            _, mtx, dist, _, _ = [X[n] for n in ('ret', 'mtx', 'dist', 'rvecs', 'tvecs')]
+        return mtx, dist
 
     def load_mask(self, filename, size_x, size_y):
         img = cv2.imread(filename)
@@ -283,15 +293,9 @@ class BlockDetectionZivid():
                 if self.__img_color == [] or self.__img_depth == []:
                     pass
                 else:
-                    # Image cropping
-                    x=700; w=400
-                    y=150; h=300
-                    img_color = self.__img_color[y:y + h, x:x + w]
-                    img_depth = self.__img_depth[y:y + h, x:x + w]
-
                     # Depth masking: thresholding by depth to find blocks & pegs
-                    blocks_masked = cv2.inRange(img_depth, 0.868, 0.882)
-                    pegs_masked = cv2.inRange(img_depth, 0.85, 0.870)
+                    blocks_masked = cv2.inRange(self.__img_depth, 0.873, 0.880)
+                    pegs_masked = cv2.inRange(self.__img_depth, 0.85, 0.872)
 
                     # Pegs detection & overlay
                     peg_points = self.pegs_detection(pegs_masked, 12)
@@ -306,10 +310,10 @@ class BlockDetectionZivid():
 
                     # Find grasping pose & overlay
                     grasping_pose = self.find_grasping_pose(result_global)
-                    blocks_overlayed = self.overlay_grasping_pose(blocks_overlayed, grasping_pose, True)
-                    # blocks_overlayed = self.overlay_numbering(blocks_overlayed, grasping_pose)
+                    blocks_overlayed = self.overlay_grasping_pose(blocks_overlayed, grasping_pose, False)
+                    blocks_overlayed = self.overlay_numbering(blocks_overlayed, grasping_pose)
 
-                    cv2.imshow("img_color", img_color)
+                    cv2.imshow("img_color", self.__img_color)
                     cv2.imshow("masked_pegs", pegs_overlayed)
                     cv2.imshow("masked_blocks", blocks_overlayed)
 
