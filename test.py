@@ -536,3 +536,35 @@ import numpy as np
 # angle = np.r_[0:120:4][best_value]
 # print angle
 
+# a = [1,2,3,4,5]
+# b = [6,7,8,9,10]
+# c = [i+k for i,k in zip(a,b)]
+
+# a = 10
+# b = np.r_[-a:a:2]
+# print b
+
+# a = np.array([[1,10,3],[5,1,2],[19,20,1],[20,3,10],[44,45,100]])
+# args = np.argwhere(a==3)
+# print np.where(a[:,0]>3, 100, 0)
+
+# a = np.array([[1,2],[3,4],[5,6],[7,8]])
+# arg_x = np.argwhere(a[:,0]>3)
+# arg_y = np.argwhere(a[:,1]<7)
+# common = np.intersect1d(arg_x, arg_y)
+#
+# print a
+# print arg_x
+# print arg_y
+# print common
+# print a[common].ravel()
+
+# b = []
+# a = np.array([[1,2],[3,4],[5,6],[7,8]])
+# print np.average(a, axis=0)
+# b.append(a[0])
+# b.append(a[1])
+# print np.array(b)
+
+# a = np.array([[1,2],[3,4],[5,6],[7,8]])
+# print a - [1,1]
