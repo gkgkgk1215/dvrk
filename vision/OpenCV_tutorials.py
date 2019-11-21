@@ -52,8 +52,8 @@ def showVideo():
             break
 
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        rotated = imutils.rotate_bound(gray, 20)
-        cv2.imshow('video', rotated)
+        # rotated = imutils.rotate_bound(gray, 20)
+        cv2.imshow('video', gray)
 
         key = cv2.waitKey(1) & 0xFF
         if key == 27:
@@ -753,6 +753,109 @@ def scaling_image():
     cv2.imshow("downsizing", downsized)
     cv2.waitKey(0)
 
+def checkerboard_calibration(row, col):
+    imgfile = '../img/img_color_checkerboard.png'
+    img = cv2.imread(imgfile)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # termination criteria
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+
+    # Find the chess board corners
+    ret, corners = cv2.findChessboardCorners(gray, (row, col), None)
+    if ret == True:
+        # If found, add object points, image points (after refining them)
+        corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
+
+        # Draw and display the corners
+        detected = cv2.drawChessboardCorners(img, (row, col), corners2, ret)
+
+    cv2.imshow('Checkerboard', detected)
+    cv2.waitKey(0)
+
+def transform_pixel_to_checkerboard(row, col):
+    imgfile = '../img/p2c_test.png'
+    img = cv2.imread(imgfile)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # termination criteria
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+
+    # Find the chess board corners
+    ret, corners = cv2.findChessboardCorners(gray, (row, col), None)
+    if ret == True:
+        # If found, add object points, image points (after refining them)
+        corners_refined = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
+
+        # Draw and display the corners
+        detected = cv2.drawChessboardCorners(img, (row, col), corners_refined, ret)
+        number_of_corners = corners_refined.shape[0]
+        corners_refined = corners_refined.ravel().reshape(number_of_corners, 2)
+
+    # import camera intrinsics
+    filename = '../calibration_files/calib_laptop.npz'
+    with np.load(filename) as X:
+        _, mtx, dist, _, t = [X[n] for n in ('ret', 'mtx', 'dist', 'rvecs', 'tvecs')]
+
+    # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(row,col,0)
+    objp = np.zeros((row * col, 3), np.float32)
+    objp[:, :2] = np.mgrid[0:row, 0:col].T.reshape(-1, 2)
+    _, rvecs, tvecs, _ = cv2.solvePnPRansac(objp, corners_refined, mtx, dist)
+    R = cv2.Rodrigues(rvecs)[0]
+    T = np.vstack((np.hstack((R, [[0],[0],[0]])), [0, 0, 0, 1]))
+
+    # input_pixel = [900, 300]
+    #
+    #
+    # cv2.imshow('checkerboard', detected)
+    # cv2.waitKey(0)
+
+def homography(row, col):
+    imgfile = '../img/checker_board_inclined.png'
+
+    # Read source image.
+    img = cv2.imread(imgfile)
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # termination criteria
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+
+    # Find the chess board corners
+    ret, corners = cv2.findChessboardCorners(gray, (col, row), None)
+    if ret == True:
+        # If found, add object points, image points (after refining them)
+        corners_refined = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
+
+        # Draw and display the corners
+        detected = cv2.drawChessboardCorners(img, (row, col), corners_refined, ret)
+        number_of_corners = corners_refined.shape[0]
+        corners_refined = corners_refined.ravel().reshape(number_of_corners, 2)
+        np.save("checker_board_inclined", corners_refined)
+
+    # Four corners of the checkerboard in source image
+    pts_src = np.array([corners_refined[0], corners_refined[2], corners_refined[9], corners_refined[11]])
+
+    # Four corners of the box in destination image.
+    pts_dst = np.array([[0, 0], [400, 0], [0, 400], [400, 400]])
+
+    # Calculate Homography
+    h, status = cv2.findHomography(pts_src, pts_dst)
+
+    # Warp source image to destination based on homography
+    img_out = cv2.warpPerspective(img, h, (600, 600))
+
+    # choose center point as an input
+    input = np.array([[580], [284], [1]])
+    cv2.circle(img, (input[0],input[1]), 5, (255,255,255), -1)
+    out = np.matrix(h)*input
+    out = out/out[2]
+    cv2.circle(img_out, (out[0], out[1]), 10, (255,255,255), -1)
+
+    # Display images
+    cv2.imshow("Source Image", img)
+    cv2.imshow("Warped Source Image", img_out)
+    cv2.waitKey(0)
+
 if __name__ == "__main__":
     # showImage()
     # showVideo()
@@ -762,7 +865,7 @@ if __name__ == "__main__":
     # trackbar()
     # pixelExtract()
     # pixelSplit()
-    # addImage('img/left_image_raw.png', 'img/right_image_raw.png')
+    # addImage('../img/img_color_checkerboard.png', '../img/img_color_pegboard.png')
     # imageBlending('img/left_image_raw.png', 'img/right_image_raw.png')
     # bitOperation(800,10)
     # hsv()
@@ -782,7 +885,10 @@ if __name__ == "__main__":
     # tmpMatching()
     # hough()
     # watershed()
-    camShift()
+    # camShift()
     # correlated()
     # rotate_image()
     # scaling_image()
+    # checkerboard_calibration(8,6)
+    # transform_pixel_to_checkerboard(4,4)
+    homography(4,3)

@@ -6,7 +6,7 @@ from sensor_msgs.msg import Image, CompressedImage, PointCloud2
 import ros_numpy
 import numpy as np
 
-class BlockDetectionZivid():
+class BlockDetection():
     def __init__(self):
         # data members
         self.__bridge = CvBridge()
@@ -24,7 +24,6 @@ class BlockDetectionZivid():
         self.__theta = np.r_[-60:60:4]
         self.__x = np.r_[-15:15:5]
         self.__y = np.r_[-15:15:5]
-        self.__corners = np.load('../calibration_files/corners_8x6.npy')
 
         # load mask
         filename = '../img/block_sample_drawing3.png'
@@ -83,7 +82,7 @@ class BlockDetectionZivid():
     def __img_crop(self, img):
         # Image cropping
         x = 650; w = 520
-        y = 50; h = 400
+        y = 100; h = 400
         cropped = img[y:y + h, x:x + w]
         return cropped
 
@@ -151,23 +150,26 @@ class BlockDetectionZivid():
         return np.reshape(coords_transformed, (coords_transformed.shape[0],1,2))
 
     def pegs_detection(self, masked_img, number_of_pegs):
-        corners = cv2.goodFeaturesToTrack(masked_img, number_of_pegs, 0.1, 30)  # corner detection
-        corners = np.int0(corners)
-        corners = np.array([i.ravel() for i in corners])  # positions of pegs
+        try:
+            corners = cv2.goodFeaturesToTrack(masked_img, number_of_pegs, 0.1, 30)  # corner detection
+            corners = np.int0(corners)
+            corners = np.array([i.ravel() for i in corners])  # positions of pegs
 
-        args = np.argwhere(masked_img > 10)
-        dx = 10
-        dy = 10
-        peg_points = []
-        for p in corners:
-            args_y = np.argwhere((p[1]-dy<args[:,0]) & (args[:,0]<p[1]+dy))
-            args_x = np.argwhere((p[0]-dx<args[:,1]) & (args[:,1]<p[0]+dx))
-            common = np.intersect1d(args_x, args_y)
-            average = np.average(args[common], axis=0)
-            peg_points.append([average[1], average[0]])
+            args = np.argwhere(masked_img > 10)
+            dx = 10
+            dy = 10
+            peg_points = []
+            for p in corners:
+                args_y = np.argwhere((p[1]-dy<args[:,0]) & (args[:,0]<p[1]+dy))
+                args_x = np.argwhere((p[0]-dx<args[:,1]) & (args[:,1]<p[0]+dx))
+                common = np.intersect1d(args_x, args_y)
+                average = np.average(args[common], axis=0)
+                peg_points.append([average[1], average[0]])
 
-        peg_points = np.array(peg_points).astype(int)
-        peg_points = self.sort_position(peg_points)
+            peg_points = np.array(peg_points).astype(int)
+            peg_points = self.sort_position(peg_points)
+        except:
+            pass
         return peg_points
 
     def sort_position(self, points):
@@ -189,25 +191,31 @@ class BlockDetectionZivid():
         return sorted
 
     def find_blocks(self, blocks_masked, peg_points):
-        # Segmenting block around each peg
-        block = np.array(
-            [blocks_masked[c[1] - self.__dy / 2:c[1] + self.__dy / 2, c[0] - self.__dx / 2:c[0] + self.__dx / 2] for c
-             in peg_points])
-        result = [None] * np.shape(block)[0]
-        for n, b in enumerate(block):
-            n_max = 0
-            for k, ang in enumerate(self.__theta):
-                for i, tx in enumerate(self.__x):
-                    for j, ty in enumerate(self.__y):
-                        block_crossed = cv2.bitwise_and(b, b, mask=self.__mask_transformed[k][i][j])
-                        n_cross = np.shape(np.argwhere(block_crossed == 255))[0]
-                        if n_cross > n_max:
-                            n_max = n_cross
-                            theta_final = ang
-                            x_final = tx
-                            y_final = ty
-            result[n] = [theta_final, x_final, y_final, n_max]
-        return result
+        try:
+            result_global = []
+            # Segmenting block around each peg
+            block = np.array(
+                [blocks_masked[c[1] - self.__dy / 2:c[1] + self.__dy / 2, c[0] - self.__dx / 2:c[0] + self.__dx / 2] for c
+                 in peg_points])
+            result = [None] * np.shape(block)[0]
+            for n, b in enumerate(block):
+                n_max = 0
+                for k, ang in enumerate(self.__theta):
+                    for i, tx in enumerate(self.__x):
+                        for j, ty in enumerate(self.__y):
+                            block_crossed = cv2.bitwise_and(b, b, mask=self.__mask_transformed[k][i][j])
+                            n_cross = np.shape(np.argwhere(block_crossed == 255))[0]
+                            if n_cross > n_max:
+                                n_max = n_cross
+                                theta_final = ang
+                                x_final = tx
+                                y_final = ty
+                result[n] = [theta_final, x_final, y_final, n_max]
+
+            result_global = [[res[0],pp[0]+res[1]-self.__mask.shape[0]/2,pp[1]+res[2]-self.__mask.shape[1]/2] for res, pp in zip(result, peg_points)]
+        except:
+            pass
+        return result_global
 
     def find_grasping_pose(self, result_global):
         pose = []
@@ -217,23 +225,33 @@ class BlockDetectionZivid():
             else:         grasping_angle_rotated = [-30+theta, 30+theta, 90+theta]
             grasping_points_rotated = self.pnt_transform(self.__grasping_points, self.__mask.shape, theta, 0, 0)
             pose.append(np.array([[ga, gp[0]+x, gp[1]+y] for ga,gp in zip(grasping_angle_rotated, grasping_points_rotated)]))
-        return pose
+        return pose     # [theta, x, y]
+
+    def select_grasping_pose(self, all_grasping_pose, peg_points):
+        selected = []
+        for gp, pp in zip(all_grasping_pose, peg_points):
+            argmax = np.argmax(np.linalg.norm(gp[:, 1:3] - pp, axis=1))
+            selected.append(gp[argmax])
+        return selected
 
     def overlay_blocks(self, img, result_global):
-        # Coloring yellow on blocks
-        blocks_colored = self.change_color(img, (0, 255, 255))
-        # Overlay contour
-        for i, res in enumerate(result_global):
-            theta, x, y = res
-            dx = self.__contour.shape[1]
-            dy = self.__contour.shape[0]
-            roi = blocks_colored[y:y+dy, x:x+dx]
-            transformed = self.img_transform(self.__contour, theta, 0, 0)
-            transformed_inv = cv2.bitwise_not(transformed)
-            bg = cv2.bitwise_and(roi, roi, mask=transformed_inv)
-            transformed_colored = self.change_color(transformed, (0, 255, 0))   # green color overlayed
-            dst = cv2.add(bg, transformed_colored)
-            blocks_colored[y:y+dy, x:x+dx] = dst
+        try:
+            # Coloring yellow on blocks
+            blocks_colored = self.change_color(img, (0, 255, 255))
+            # Overlay contour
+            for i, res in enumerate(result_global):
+                theta, x, y = res
+                dx = self.__contour.shape[1]
+                dy = self.__contour.shape[0]
+                roi = blocks_colored[y:y+dy, x:x+dx]
+                transformed = self.img_transform(self.__contour, theta, 0, 0)
+                transformed_inv = cv2.bitwise_not(transformed)
+                bg = cv2.bitwise_and(roi, roi, mask=transformed_inv)
+                transformed_colored = self.change_color(transformed, (0, 255, 0))   # green color overlayed
+                dst = cv2.add(bg, transformed_colored)
+                blocks_colored[y:y+dy, x:x+dx] = dst
+        except:
+            pass
         return blocks_colored
 
     def overlay_pegs(self, img, peg_points):
@@ -248,10 +266,10 @@ class BlockDetectionZivid():
             count += 1
         return pegs_colored
 
-    def overlay_grasping_pose(self, img, grasping_pose, put_text=False):
+    def overlay_grasping_pose(self, img, all_grasping_pose, selected_grasping_pose, put_text=False):
         overlayed = np.copy(img)
         font = cv2.FONT_HERSHEY_SIMPLEX
-        for gp in grasping_pose:
+        for gp in all_grasping_pose:
             gp = gp.astype(int)
             cv2.circle(overlayed, (gp[0][1], gp[0][2]), 3, (0, 0, 255), 2, -1)     # red color overlayed
             cv2.circle(overlayed, (gp[1][1], gp[1][2]), 3, (0, 0, 255), 2, -1)
@@ -263,6 +281,10 @@ class BlockDetectionZivid():
                 cv2.putText(overlayed, text, (gp[1][1] + 10, gp[1][2]), font, 0.3, (255, 255, 255), 1)
                 text = "%d" % (gp[2][0]);
                 cv2.putText(overlayed, text, (gp[2][1], gp[2][2] + 15), font, 0.3, (255, 255, 255), 1)
+
+        for gp in selected_grasping_pose:
+            gp = gp.astype(int)
+            cv2.circle(overlayed, (gp[1], gp[2]), 3, (255, 255, 255), 2, -1)  # green color overlayed
         return overlayed
 
     def overlay_numbering(self, img, grasping_pose):
@@ -302,16 +324,17 @@ class BlockDetectionZivid():
                     pegs_overlayed = self.overlay_pegs(pegs_masked, peg_points)
 
                     # Segment images around peg_points & Find blocks
-                    result = self.find_blocks(blocks_masked, peg_points)
-                    result_global = [[res[0], pp[0]+res[1]-self.__mask.shape[0]/2, pp[1]+res[2]-self.__mask.shape[1]/2] for res, pp in zip(result, peg_points)]
+                    result_global = self.find_blocks(blocks_masked, peg_points)
 
                     # Coloring & Overlay
                     blocks_overlayed = self.overlay_blocks(blocks_masked, result_global)
 
                     # Find grasping pose & overlay
-                    grasping_pose = self.find_grasping_pose(result_global)
-                    blocks_overlayed = self.overlay_grasping_pose(blocks_overlayed, grasping_pose, False)
-                    blocks_overlayed = self.overlay_numbering(blocks_overlayed, grasping_pose)
+                    all_grasping_pose = self.find_grasping_pose(result_global)
+                    selected_grasping_pose = self.select_grasping_pose(all_grasping_pose, peg_points)
+
+                    blocks_overlayed = self.overlay_grasping_pose(blocks_overlayed, all_grasping_pose, selected_grasping_pose, False)
+                    blocks_overlayed = self.overlay_numbering(blocks_overlayed, all_grasping_pose)
 
                     cv2.imshow("img_color", self.__img_color)
                     cv2.imshow("masked_pegs", pegs_overlayed)
@@ -326,4 +349,4 @@ class BlockDetectionZivid():
             cv2.destroyAllWindows()
 
 if __name__ == '__main__':
-    bdz = BlockDetectionZivid()
+    bd = BlockDetection()

@@ -568,3 +568,108 @@ import numpy as np
 
 # a = np.array([[1,2],[3,4],[5,6],[7,8]])
 # print a - [1,1]
+
+# a = np.array([1,2])
+# b = np.array([1,2])
+# if np.array_equal(a,b):
+#     print "equal numpy array"
+#
+# if list(a) == list(b):
+#     print "equal list"
+#
+# if np.allclose(a,b):
+#     print "close numpy array"
+# np.isclose()
+#
+# a = [[1,2],[3,4],[5,6]]
+# print len(a)
+
+# a = 2
+# if a==2:
+#     print "true"
+# elif a<2:
+#     print "true11"
+
+# # p1 = [ 820.50091553,  271.78146362]
+# # p2 = [ 928.33380127,  251.72174072]
+# p1 = [ 575.2902832, 191.61149597]
+# p2 = [ 670.41729736, 175.2464447]
+# a = p2[0]-p1[0]
+# b = p1[1]-p2[1]
+# c = a*p1[1] + b*p1[0]
+# #line: a*x + b*y = c
+# x = 180
+# y = (-a*x + c)/b    # 642.785760197
+# print y
+# print a*x+b*y
+# print c
+
+# x1 = 0
+# x2 = 100
+# assert x1!=x2
+
+# np.squeeze()
+
+# import PyKDL
+# from tf_conversions import posemath
+# rz = 0
+# ry = 0
+# rx = 0
+# px = 0
+# py = 0
+# pz = 0
+# R = PyKDL.Rotation.EulerZYX(rz,ry,rx)
+# t = PyKDL.Vector(px, py, pz)
+#
+# frame = PyKDL.Frame(R,t)
+# pm = posemath.toMsg(frame)
+# print pm
+
+# px = 1.1
+# py = 2
+# pz = 3
+# rx = 4
+# ry = 5
+# rz = 6
+# rw = 7
+# a = np.array([], dtype=np.float)
+# a.resize(2,5)
+# a[0].flat[:] = np.array([[px, py, pz, rx, ry, rz, rw]])
+# b = np.array([[px, py, pz], [rx, ry, rz, rw]])
+# print b.shape
+
+# import PyKDL
+# from tf_conversions import posemath
+# rz = 0
+# ry = 0
+# rx = np.pi
+# R = PyKDL.Rotation.EulerZYX(rz,ry,rx)
+# q = R.GetQuaternion()
+# print q
+
+# a = [0.0, 0.0]
+# a[0] = [1,2,3,4]
+# a[1] = [5,6,7,7,7]
+# print a
+
+# a = 2
+# b = 2
+# c = 3
+# d = [4,5]
+# result = np.array([a,b,c,d])
+# result = [p+1 for p in result]
+# print result
+
+# print np.array([2,3,4,[4,5]])
+
+# print np.array([[1,2], np.array([2, 3, 4]),1,(2,3)])
+# print np.array([1, (2,3)])
+# print np.array([1, [2,3]])
+
+# x = np.array([1,2,3])
+# x[0] = np.array([4])
+# print x
+# x = np.array([1,2,3])
+# x[0] = np.array([4,5])
+# print x
+

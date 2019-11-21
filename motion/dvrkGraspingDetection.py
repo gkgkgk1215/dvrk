@@ -7,7 +7,7 @@ import threading
 import numpy as np
 import dvrk.utils.CmnUtil as U
 
-class dvrkDetectGrasping(threading.Thread):
+class dvrkGraspingDetection(threading.Thread):
 
     def __init__(self, interval_ms=10, video_recording=False):
         # data members
@@ -165,4 +165,4 @@ class dvrkDetectGrasping(threading.Thread):
         self.__state_jaw_current_PSM2 = list(joint)
 
 if __name__ == '__main__':
-    dg = dvrkDetectGrasping(interval_ms=10, video_recording=True)
+    dg = dvrkGraspingDetection(interval_ms=10, video_recording=True)

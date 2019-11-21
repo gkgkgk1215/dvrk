@@ -1,9 +1,11 @@
-from dvrkArm import dvrkArm
+import numpy as np
 import threading
 import time
+
 import rospy
-import numpy as np
+
 import dvrk.utils as U
+from dvrk.motion.dvrkArm import dvrkArm
 
 
 class dvrkClothSim(threading.Thread):

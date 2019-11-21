@@ -1,9 +1,9 @@
-from dvrkArm import dvrkArm
-from dvrkClothSim import  dvrkClothSim
-import rospy
 import numpy as np
-import time
 
+import rospy
+
+from dvrk.motion.dvrkArm import dvrkArm
+from dvrkClothSim import  dvrkClothSim
 
 p1 = dvrkArm('/PSM1')
 p2 = dvrkArm('/PSM2')
