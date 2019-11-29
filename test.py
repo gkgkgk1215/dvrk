@@ -673,3 +673,53 @@ import numpy as np
 # x[0] = np.array([4,5])
 # print x
 
+# import matplotlib.pyplot as pyp
+# p1 = [-0.053, -0.103]
+# p2 = [-0.069, -0.100]
+# p3 = [-0.049, -0.087]
+# p4 = [-0.066, -0.084]
+# x = [p1[0], p2[0], p3[0], p4[0]]
+# y = [p1[1], p2[1], p3[1], p4[1]]
+# pyp.plot(x,y,  'bo')        # plot x and y using default line style and color
+# pyp.show()
+
+# def Hello(a=1, b=2,c=3):
+#     print a+b+c
+# Hello(b=5)
+
+# import PyKDL
+# euler = np.array([30, 70, 10])*np.pi/180.
+# e = PyKDL.Rotation.EulerZYX(euler[0], euler[1], euler[2])
+# print e.GetQuaternion()
+#
+# q = [-0.078926479011875397, 0.57040210947546066, 0.16291828363609984, 0.80116769609976157]
+# qq = PyKDL.Rotation.Quaternion(q[0], q[1], q[2], q[3])
+# print qq.GetEulerZYX()
+#
+# import FLSpegtransfer.utils.CmnUtil as U
+# print U.euler_to_quaternion(euler[0], euler[1], euler[2])
+# print U.quaternion_to_eulerAngles(q[0], q[1], q[2], q[3])
+
+# import time
+# timer = 0
+# while True:
+#     time.sleep(0.5)
+#     timer += 0.5
+#     print timer
+
+# a = 1
+# if type(a) == int:
+#     print "a"
+
+# print True and False    # same as "&"
+# print True and True     # same as "|"
+
+# p = np.array([[ 51.05913455,  17.16452419], [ 37.4574824,   14.33697069], [ 28.09265655,  11.28737454]])
+# org = np.array([0,0])
+# print np.linalg.norm(p - org, axis=1)
+# print np.sqrt(51.059**2 + 17.165**2)
+
+# a = [1.2, 3.4, 5.6]
+# b = map(int, a)
+# print b
+
