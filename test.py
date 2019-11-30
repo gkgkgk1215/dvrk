@@ -723,3 +723,11 @@ import numpy as np
 # b = map(int, a)
 # print b
 
+# a = 7
+# b = a // 2
+# c = a % 2
+# print b,c
+
+# a = np.array([[1,2],[3,4],[5,6],[7,8]])
+# arg = [1,3]
+# print a[arg]

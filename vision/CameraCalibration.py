@@ -77,18 +77,18 @@ class CameraCalibration():
                         gray = cv2.cvtColor(self.__img_raw_cam, cv2.COLOR_BGR2GRAY)
 
                         # Find the chess board corners
-                        ret, corners = cv2.findChessboardCorners(gray, (self.__row, self.__col), None)
+                        ret, corners = cv2.findChessboardCorners(gray, (self.__col, self.__row), None)
                         if ret == True:
                             # If found, add object points, image points (after refining them)
                             corners2 = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
 
                             # Draw and display the corners
-                            self.__img_raw_cam = cv2.drawChessboardCorners(self.__img_raw_cam, (self.__row, self.__col),
+                            self.__img_raw_cam = cv2.drawChessboardCorners(self.__img_raw_cam, (self.__col, self.__row),
                                                                            corners2, ret)
                             cnt += 1
                             objpoints.append(objp)
                             imgpoints.append(corners2)
-                            # np.save("corners_8x6", imgpoints)
+                            np.save("corners_8x6", imgpoints)
                             print imgpoints
                             print ("Corner captured: %d trials" % (cnt))
                         else:
@@ -125,7 +125,7 @@ class CameraCalibration():
     def __img_crop(self, img):
         # Image cropping
         x = 650; w = 520
-        y = 50; h = 400
+        y = 100; h = 400
         cropped = img[y:y + h, x:x + w]
         return cropped
 
@@ -134,4 +134,4 @@ class CameraCalibration():
         return cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
 if __name__ == '__main__':
-    cc = CameraCalibration(checkerboard_row=8, checkerboard_col=6, cam_type='ROS_TOPIC', savefilename='calib_zivid.npz')
+    cc = CameraCalibration(checkerboard_row=6, checkerboard_col=8, cam_type='ROS_TOPIC', savefilename='calib_zivid.npz')
