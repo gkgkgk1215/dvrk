@@ -124,8 +124,8 @@ class CameraCalibration():
 
     def __img_crop(self, img):
         # Image cropping
-        x = 650; w = 520
-        y = 100; h = 400
+        x = 710; w = 520
+        y = 450; h = 400
         cropped = img[y:y + h, x:x + w]
         return cropped
 

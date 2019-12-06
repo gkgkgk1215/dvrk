@@ -100,6 +100,17 @@ def writeVideo():
     out.release()
     cv2.destroyAllWindows()
 
+    # # video recording
+    # self.__video_recording = video_recording
+    # if self.__video_recording is True:
+    #     fps = 1000.0 / self.__interval_ms
+    #     fcc = cv2.VideoWriter_fourcc('D', 'I', 'V', 'X')
+    #     self.__img_width = 640
+    #     self.__img_height = 360
+    #     self.out = cv2.VideoWriter('video_recorded.avi', fcc, fps, (self.__img_width, self.__img_height))
+    #     print ("start recording")
+
+
 """
 Drawing shapes
 """
@@ -109,6 +120,7 @@ def drawing():
     # drawing lines with various color and thickness
     # BGR: Blue-Green-Red order
     cv2.line(img, (0,0), (400,100), (255,0,0), 5)
+    cv2.triangle()
     cv2.rectangle(img, (384,0), (510,128), (0,255,0), 3)
     cv2.circle(img, (447,63), 63, (0,0,255), -1)
     cv2.ellipse(img, (256,256), (100,50), 20,45,270, (255,0,0), -1)
@@ -856,6 +868,22 @@ def homography(row, col):
     cv2.imshow("Warped Source Image", img_out)
     cv2.waitKey(0)
 
+def resize_img():
+    filename = "../img/block_sample_drawing3.png"
+    img = cv2.imread(filename)
+
+    # resize image
+    scale_percent = 80  # percent of original size
+    dx = int(img.shape[0] * scale_percent / 100)
+    dy = int(img.shape[1] * scale_percent / 100)
+    dim = (dx, dy)
+    resized = cv2.resize(img, dim, interpolation=cv2.INTER_AREA)
+    print('Resized Dimensions : ', resized.shape)
+    cv2.imshow("original image", img)
+    cv2.imshow("Resized image", resized)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+
 if __name__ == "__main__":
     # showImage()
     # showVideo()
@@ -891,4 +919,5 @@ if __name__ == "__main__":
     # scaling_image()
     # checkerboard_calibration(8,6)
     # transform_pixel_to_checkerboard(4,4)
-    homography(4,3)
+    # homography(4,3)
+    resize_img()
