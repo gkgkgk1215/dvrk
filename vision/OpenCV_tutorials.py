@@ -885,7 +885,7 @@ def resize_img():
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    # showImage()
+    showImage()
     # showVideo()
     # writeVideo()
     # drawing()
@@ -920,4 +920,4 @@ if __name__ == "__main__":
     # checkerboard_calibration(8,6)
     # transform_pixel_to_checkerboard(4,4)
     # homography(4,3)
-    resize_img()
+    # resize_img()
