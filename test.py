@@ -741,9 +741,15 @@ import numpy as np
 # print (np.shape(a))
 # print (a[:,:,0:3])
 
-a = np.array([[[1,2,9,3],[4,5,6,7]],[[6,7,8,9],[10,11,11,12]],[[12,15,13,11],[10,9,1,2]]])
-print (a.shape)
+# a = np.array([[[1,2,9,3],[4,5,6,7]],[[6,7,8,9],[10,11,11,12]],[[12,15,13,11],[10,9,1,2]]])
+# print (a.shape)
 # a = np.moveaxis(a, 0, 2)
-a = np.moveaxis(a, [0, 1, 2], [2, 1, 0])
-print (a.shape)
+# a = np.moveaxis(a, [0, 1, 2], [2, 1, 0])
+# print (a.shape)
 
+# np.vstack(p,p,p)
+
+a = np.array([1,2,3,4,5])
+p = np.array([True,False,True,False,True])
+a[p] = 0
+print(a)

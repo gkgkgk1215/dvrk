@@ -1,5 +1,8 @@
 # based on Python 3.7 / OpenCV
-
+import sys
+for p in sys.path:
+    if p == '/opt/ros/kinetic/lib/python2.7/dist-packages':
+        sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages')
 import cv2
 import matplotlib.pyplot as plt
 from random import shuffle
@@ -120,7 +123,7 @@ def drawing():
     # drawing lines with various color and thickness
     # BGR: Blue-Green-Red order
     cv2.line(img, (0,0), (400,100), (255,0,0), 5)
-    cv2.triangle()
+    # cv2.triangle()
     cv2.rectangle(img, (384,0), (510,128), (0,255,0), 3)
     cv2.circle(img, (447,63), 63, (0,0,255), -1)
     cv2.ellipse(img, (256,256), (100,50), 20,45,270, (255,0,0), -1)
@@ -751,16 +754,16 @@ def correlated():
 
 def rotate_image():
     mask = cv2.imread('../img/block_sample.png')
-    print mask.shape
+    print (mask.shape)
     rotated = imutils.rotate_bound(mask, 40)
-    print rotated.shape
+    print (rotated.shape)
     cv2.imshow("aa", rotated)
     cv2.waitKey(0)
 
 def scaling_image():
     mask = cv2.imread('../img/block_sample.png')
     height, width = mask.shape[:2]
-    print height, width, (int)(1.0*width), (int)(1.0*height)
+    print (height, width, (int)(1.0*width), (int)(1.0*height))
     downsized = cv2.resize(mask, ((int)(0.5*width), (int)(0.5*height)), interpolation=cv2.INTER_CUBIC)
     cv2.imshow("downsizing", downsized)
     cv2.waitKey(0)
@@ -885,10 +888,10 @@ def resize_img():
     cv2.destroyAllWindows()
 
 if __name__ == "__main__":
-    showImage()
+    # showImage()
     # showVideo()
     # writeVideo()
-    # drawing()
+    drawing()
     # mouseBrush()
     # trackbar()
     # pixelExtract()
