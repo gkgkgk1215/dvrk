@@ -749,7 +749,17 @@ import numpy as np
 
 # np.vstack(p,p,p)
 
-a = np.array([1,2,3,4,5])
-p = np.array([True,False,True,False,True])
-a[p] = 0
-print(a)
+# a = np.array([1,2,3,4,5])
+# p = np.array([True,False,True,False,True])
+# a[p] = 0
+# print(a)
+
+# entropy
+# a = -4/11 * np.log2(4/11) - 7/11 * np.log2(7/11)
+# print(a)
+
+# linear regression
+X = np.matrix([[1,1],[1,2],[1,3]])
+Y = np.matrix([[2],[6],[4]])
+theta = np.linalg.inv(np.matrix.transpose(X)*X)*np.matrix.transpose(X)*Y
+print (theta)

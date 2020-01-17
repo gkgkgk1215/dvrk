@@ -890,8 +890,8 @@ def resize_img():
 if __name__ == "__main__":
     # showImage()
     # showVideo()
-    # writeVideo()
-    drawing()
+    writeVideo()
+    # drawing()
     # mouseBrush()
     # trackbar()
     # pixelExtract()
