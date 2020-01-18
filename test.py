@@ -759,7 +759,22 @@ import numpy as np
 # print(a)
 
 # linear regression
-X = np.matrix([[1,1],[1,2],[1,3]])
-Y = np.matrix([[2],[6],[4]])
-theta = np.linalg.inv(np.matrix.transpose(X)*X)*np.matrix.transpose(X)*Y
-print (theta)
+# X = np.matrix([[1,1],[1,2],[1,3]])
+# Y = np.matrix([[2],[6],[4]])
+# theta = np.linalg.inv(np.matrix.transpose(X)*X)*np.matrix.transpose(X)*Y
+# print (theta)
+
+# sort & max value by key
+# cnts = sorted(cnts, key=cv2.contourArea, reverse=True)
+# c1 = max(cnts, key=cv2.contourArea)
+
+# Hough circles: detected unstable
+# blurred = cv2.GaussianBlur(depth_mask, (11, 11), 0)
+# circles = cv2.HoughCircles(depth_mask, cv2.HOUGH_GRADIENT, 1, 100, param1=60, param2=30, minRadius=0, maxRadius=0)
+# if circles is not None:
+#     circles = np.uint16(np.around(circles))
+#     for i in circles[0,:]:
+#         cv2.circle(frame, (i[0],i[1]), i[2], (255,255,0), 3)
+
+# moments of image
+# M = cv2.moments(depth_mask)
