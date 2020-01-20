@@ -778,3 +778,26 @@ import numpy as np
 
 # moments of image
 # M = cv2.moments(depth_mask)
+
+# a = 10
+#
+# def foo() :
+#     global a
+#     a = a + 5
+#     print("run1")
+#     return False
+#
+# if foo() and foo():
+#     a = a + 5
+#     print("run2")
+#
+# if True or foo():
+#     print("run3")
+#     a = a + 5
+#
+# print(a)
+
+dict1 = {'0' : 1234 , 0 : 'a string' , 2 : 0, 1234 : '0'}
+
+print(dict1[0])
+
