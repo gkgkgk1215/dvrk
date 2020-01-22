@@ -1,4 +1,3 @@
-# UDP multicast examples, Hugo Vincent, 2005-05-14.
 import socket
 import struct
 
@@ -13,7 +12,6 @@ def client():
                          socket.SOCK_DGRAM)  # UDP
     sock2 = socket.socket(socket.AF_INET,  # Internet
                          socket.SOCK_DGRAM)  # UDP
-
     sock.bind((UDP_IP, UDP_PORT_CLNT))
     sock2.bind((UDP_IP, UDP_PORT_CLNT2))
 

@@ -1,8 +1,5 @@
-# UDP multicast examples, Hugo Vincent, 2005-05-14.
 import socket
 import struct
-import numpy as np
-import FLSpegtransfer.utils.CmnUtil as U
 
 def server():
     print ()
@@ -16,6 +13,9 @@ def server():
                          socket.SOCK_DGRAM) # UDP
     sock2 = socket.socket(socket.AF_INET,  # Internet
                          socket.SOCK_DGRAM)  # UDP
+
+    # sock.setblocking(0)  # Non-blocking mode
+    # sock2.setblocking(0)  # Non-blocking mode
 
     sock.bind((UDP_IP, UDP_PORT_SERV))
     sock2.bind((UDP_IP, UDP_PORT_SERV2))
