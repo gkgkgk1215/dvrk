@@ -797,7 +797,20 @@ import numpy as np
 #
 # print(a)
 
-dict1 = {'0' : 1234 , 0 : 'a string' , 2 : 0, 1234 : '0'}
+# dict1 = {'0' : 1234 , 0 : 'a string' , 2 : 0, 1234 : '0'}
+# print(dict1[0])
 
-print(dict1[0])
+# import foo
+# method_to_call = getattr(foo, 'bar')
+# result = method_to_call()
+# a = [[1,2,3],[4,5,6]]
+# print (np.shape(a))
+# b = getattr(np, 'shape')
+# print (b(a))
 
+import struct
+# X = np.array([1,2,3,4,5,6])
+# Y = np.array([7,8,9,10])
+# b = struct.pack('=6f4f', *X, *Y)
+# c = struct.unpack('=6f4f', b)
+# print(c)

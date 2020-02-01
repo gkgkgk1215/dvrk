@@ -19,9 +19,11 @@ def server():
 
     sock.bind((UDP_IP, UDP_PORT_SERV))
     sock2.bind((UDP_IP, UDP_PORT_SERV2))
+    import numpy as np
 
     while True:
-        data = struct.pack('fff', 1, 2, 3)
+        X = np.array([1,2,3,4,5,6])
+        data = struct.pack('=6f', *X)
         sock.sendto(data, (UDP_IP, UDP_PORT_CLNT))
         data = struct.pack('fff', 4, 5, 6)
         sock2.sendto(data, (UDP_IP, UDP_PORT_CLNT2))

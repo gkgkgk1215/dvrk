@@ -24,8 +24,8 @@ def client():
         sock2.sendto(data_send2, (UDP_IP, UDP_PORT_SERV2))
 
         data_recv, addr = sock.recvfrom(1024)  # buffer size is 1024 bytes
-        pos1, pos2, pos3 = struct.unpack('fff', data_recv)
-        print (addr, pos1, pos2, pos3)
+        pose = struct.unpack('=6f', data_recv)
+        print (addr, pose)
 
         data_recv, addr = sock2.recvfrom(1024)  # buffer size is 1024 bytes
         pos1, pos2, pos3 = struct.unpack('fff', data_recv)

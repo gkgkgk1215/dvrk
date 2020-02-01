@@ -48,6 +48,6 @@ if __name__ == "__main__":
             print(job.cnt)
             time.sleep(0.1)
         except ProgramKilled:
-            print "Program killed: running cleanup code"
+            print("Program killed: running cleanup code")
             job.stop()
             break
