@@ -887,6 +887,18 @@ def resize_img():
     cv2.waitKey(0)
     cv2.destroyAllWindows()
 
+def vconcat_resize_min(self, im_list):
+    w_min = min(im.shape[1] for im in im_list)
+    im_list_resize = [cv2.resize(im, (w_min, int(im.shape[0] * w_min / im.shape[1])), interpolation=cv2.INTER_CUBIC)
+                      for im in im_list]
+    return cv2.vconcat(im_list_resize)
+
+def hconcat_resize_min(self, im_list):
+    h_min = min(im.shape[0] for im in im_list)
+    im_list_resize = [cv2.resize(im, (int(im.shape[1] * h_min / im.shape[0]), h_min), interpolation=cv2.INTER_CUBIC)
+                      for im in im_list]
+    return cv2.hconcat(im_list_resize)
+
 if __name__ == "__main__":
     # showImage()
     # showVideo()
@@ -924,3 +936,5 @@ if __name__ == "__main__":
     # transform_pixel_to_checkerboard(4,4)
     # homography(4,3)
     # resize_img()
+    # image stack (concatenate)
+    # images = self.hconcat_resize_min([img_color, depth_masked, cv2.cvtColor(red_masked, cv2.COLOR_GRAY2BGR)])
