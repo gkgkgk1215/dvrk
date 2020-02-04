@@ -814,3 +814,9 @@ import struct
 # b = struct.pack('=6f4f', *X, *Y)
 # c = struct.unpack('=6f4f', b)
 # print(c)
+
+# RMSE
+# pos_des = np.array([1,2,3,4,5,6,7,8,9,10])
+# pos_act = np.array([0,2,3,4,5,3,7,7,9,11])
+# RMSE = np.sqrt(np.mean((pos_des - pos_act) ** 2))
+# print(RMSE)

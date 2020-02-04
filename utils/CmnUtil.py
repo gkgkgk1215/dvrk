@@ -145,3 +145,17 @@ def move_p_from_net_output(x, y, dx, dy, row_board, col_board, data_square, p):
 
 def LPF(data_curr, data_prev, fc, dt):
     return 2*np.pi*fc*dt*data_curr + (1-2*np.pi*fc*dt)*data_prev;
+
+
+# Get a rigid transformation matrix from pts1 to pts2
+def get_rigid_transform(pts1, pts2):
+    mean1 = pts1.mean(axis=0)
+    mean2 = pts2.mean(axis=0)
+    pts1 = np.array([p-mean1 for p in pts1])
+    pts2 = np.array([p-mean2 for p in pts2])
+    H = pts1.T.dot(pts2)   # covariance matrix
+    U,S,V = np.linalg.svd(H)
+    V = V.T
+    R = V.dot(U.T)
+    t = -R.dot(mean1.T) + mean2.T
+    return R, t
