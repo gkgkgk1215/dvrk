@@ -546,7 +546,9 @@ import numpy as np
 
 # a = np.array([[1,10,3],[5,1,2],[19,20,1],[20,3,10],[44,45,100]])
 # args = np.argwhere(a==3)
-# print np.where(a[:,0]>3, 100, 0)
+# print(a)
+# print(args)
+# print (np.where(a[:,0]>3, 100, 0))
 
 # a = np.array([[1,2],[3,4],[5,6],[7,8]])
 # arg_x = np.argwhere(a[:,0]>3)
@@ -808,7 +810,7 @@ import numpy as np
 # b = getattr(np, 'shape')
 # print (b(a))
 
-import struct
+# import struct
 # X = np.array([1,2,3,4,5,6])
 # Y = np.array([7,8,9,10])
 # b = struct.pack('=6f4f', *X, *Y)
@@ -820,3 +822,6 @@ import struct
 # pos_act = np.array([0,2,3,4,5,3,7,7,9,11])
 # RMSE = np.sqrt(np.mean((pos_des - pos_act) ** 2))
 # print(RMSE)
+
+# a = np.array([1,2,3])
+# print (type(np.array(a)))
