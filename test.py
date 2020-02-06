@@ -826,10 +826,10 @@ import numpy as np
 # a = np.array([1,2,3])
 # print (type(np.array(a)))
 
-a = 1
-b = 2
-c = 3
-d = [a,b, lambda:c]
-c = 99
-print(d[2]())
+# a = 1
+# b = 2
+# c = 3
+# d = [a,b, lambda:c]
+# c = 99
+# print(d[2]())
 
