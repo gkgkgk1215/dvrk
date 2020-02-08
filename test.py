@@ -833,3 +833,7 @@ import numpy as np
 # c = 99
 # print(d[2]())
 
+# a = [ 35,   0,   0]
+# b = [  0, -35,   0]
+# c = np.cross(a,b)/(np.linalg.norm(a)*np.linalg.norm(b))*35
+# print(c)
