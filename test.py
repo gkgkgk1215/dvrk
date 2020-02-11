@@ -837,3 +837,11 @@ import numpy as np
 # b = [  0, -35,   0]
 # c = np.cross(a,b)/(np.linalg.norm(a)*np.linalg.norm(b))*35
 # print(c)
+
+# step = 20
+# t = np.arange(0, 1, 1/step)
+# input = 70*np.pi/180 * np.sin(2*np.pi*t)
+# print (t)
+# print(input)
+
+print(20*2.5*np.pi/180)
