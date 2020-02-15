@@ -964,3 +964,4 @@ if __name__ == "__main__":
     # images = self.hconcat_resize_min([img_color, depth_masked, cv2.cvtColor(red_masked, cv2.COLOR_GRAY2BGR)])
     # img = np.zeros((500, 500, 3), np.uint8)
     # drawline(img, [0, 0], [400, 400], (255, 0, 0), 1, 'dashed', gap=10)
+    cv2.resize()
