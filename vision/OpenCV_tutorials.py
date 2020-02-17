@@ -923,6 +923,42 @@ def drawline(img,pt1,pt2,color,thickness=1,style='dotted',gap=20):
                 cv2.line(img,s,e,color,thickness)
             i+=1
 
+def downsample_naive(img, downsample_factor):
+    """
+    Naively downsamples image without LPF.
+    """
+    new_img = img.copy()
+    new_img = new_img[::downsample_factor]
+    new_img = new_img[:, ::downsample_factor]
+    return new_img
+
+def extract_extreme_points():
+    # leftmost, rightmost, topmost, bottommost
+    pl = np.array(contour[contour[:,:,0].argmin()][0])
+    pr = np.array(contour[contour[:,:,0].argmax()][0])
+    pt = np.array(contour[contour[:,:,1].argmin()][0])
+    pb = np.array(contour[contour[:,:,1].argmax()][0])
+    print (pl, pr, pt, pb)
+
+def image_moment():
+    mmt = cv2.moments(contour)
+    for key,val in mmt.items():
+        print(key, val)
+
+    cx = int(mmt['m10']/mmt['m00'])
+    cy = int(mmt['m01']/mmt['m00'])
+
+    # mu20_ = mmt['m20']/mmt['m00'] - cx*cx
+    # mu02_ = mmt['m02']/mmt['m00'] - cy*cy
+    # mu11_ = mmt['m11']/mmt['m00'] - cx*cy
+    # theta = 0.5*np.arctan2(2*mu11_, mu20_-mu02_)
+
+def load_intrinsics(self, filename):
+    # load calibration data
+    with np.load(filename) as X:
+        _, mtx, dist, _, _ = [X[n] for n in ('ret', 'mtx', 'dist', 'rvecs', 'tvecs')]
+    return mtx, dist
+
 if __name__ == "__main__":
     # showImage()
     # showVideo()
@@ -964,4 +1000,3 @@ if __name__ == "__main__":
     # images = self.hconcat_resize_min([img_color, depth_masked, cv2.cvtColor(red_masked, cv2.COLOR_GRAY2BGR)])
     # img = np.zeros((500, 500, 3), np.uint8)
     # drawline(img, [0, 0], [400, 400], (255, 0, 0), 1, 'dashed', gap=10)
-    cv2.resize()
