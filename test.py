@@ -852,3 +852,7 @@ import numpy as np
 # print(a)
 # nonzero = (a > 0).astype(float)
 # print(nonzero)
+
+a = 1; b=1; c=1; d=1
+if a==b==c==d:
+    print("all equal")
