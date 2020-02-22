@@ -853,6 +853,17 @@ import numpy as np
 # nonzero = (a > 0).astype(float)
 # print(nonzero)
 
-a = 1; b=1; c=1; d=1
-if a==b==c==d:
-    print("all equal")
+# a = 1; b=1; c=1; d=1
+# if a==b==c==d:
+#     print("all equal")
+#
+# a = [0,0,0,0,0]
+# if all(n==0 for n in a):
+#     print ("a")
+#     # randomize joint angles - q1,q2,q3
+#     pos_rand = np.random.uniform(self.__pos_st, self.__pos_ed)
+#     q1, q2, q3 = self.BD.ik_position(pos_rand)
+#
+#     # randomize joint angles - q4,q6
+#     q4 = np.random.uniform(90.*np.pi/180., 90.*np.pi/180.)
+#     q6 = np.random.uniform(-60.*np.pi/180., 60.*np.pi/180.)
