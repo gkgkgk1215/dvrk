@@ -867,8 +867,10 @@ import numpy as np
 #     # randomize joint angles - q4,q6
 #     q4 = np.random.uniform(90.*np.pi/180., 90.*np.pi/180.)
 #     q6 = np.random.uniform(-60.*np.pi/180., 60.*np.pi/180.)
-a = [[1,2,3,4],[5,6,7,8],[9,10,11,12]]
-c = [0,2]
-b = np.delete(a,c,axis=0)
+# a = [[1,2,3,4],[5,6,7,8],[9,10,11,12]]
+# c = [0,2]
+# b = np.delete(a,c,axis=0)
+# print(b)
 
-print(b)
+# count = data.size - np.count_nonzero(np.isnan(data))
+# np.nanmean(p[:,2], axis=0)
