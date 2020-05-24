@@ -1,9 +1,13 @@
+import sys
+for p in sys.path:
+    if p == '/opt/ros/kinetic/lib/python2.7/dist-packages':
+        sys.path.remove('/opt/ros/kinetic/lib/python2.7/dist-packages')
 import cv2
-import rospy
-from sensor_msgs.msg import Image, CompressedImage
-from cv_bridge import CvBridge, CvBridgeError
+# import rospy
+# from sensor_msgs.msg import Image, CompressedImage
+# from cv_bridge import CvBridge, CvBridgeError
 import numpy as np
-import pyrealsense2 as rs
+# import pyrealsense2 as rs
 
 class CameraCalibration():
     def __init__(self, checkerboard_row, checkerboard_col, cam_type='USB', savefilename='calib.npz'):
@@ -12,7 +16,7 @@ class CameraCalibration():
         self.__col = checkerboard_col
         self.__cam_type = cam_type
         self.__filename = savefilename
-        self.__bridge = CvBridge()
+        # self.__bridge = CvBridge()
         self.__img_raw_cam = []
 
         # initialize camera
@@ -89,7 +93,7 @@ class CameraCalibration():
                             objpoints.append(objp)
                             imgpoints.append(corners2)
                             np.save("corners_8x6", imgpoints)
-                            print imgpoints
+                            print (imgpoints)
                             print ("Corner captured: %d trials" % (cnt))
                         else:
                             print ("Corner not captured, try again")
@@ -107,10 +111,10 @@ class CameraCalibration():
             if objpoints != [] and imgpoints != []:
                 ret, mtx, dist, rvecs, tvecs = cv2.calibrateCamera(objpoints, imgpoints, gray.shape[::-1], None, None)
                 np.savez(self.__filename, ret=ret, mtx=mtx, dist=dist, rvecs=rvecs, tvecs=tvecs)
-                print "Calibration data has been saved to", self.__filename
-                print "mtx", mtx
+                print ("Calibration data has been saved to", self.__filename)
+                print ("mtx", mtx)
             else:
-                print "Calibration data is empty"
+                print ("Calibration data is empty")
 
     def __img_raw_cam_cb(self, data):
         try:
@@ -134,4 +138,4 @@ class CameraCalibration():
         return cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
 
 if __name__ == '__main__':
-    cc = CameraCalibration(checkerboard_row=6, checkerboard_col=8, cam_type='ROS_TOPIC', savefilename='calib_zivid.npz')
+    cc = CameraCalibration(checkerboard_row=3, checkerboard_col=4, cam_type='USB', savefilename='calib_laptop.npz')

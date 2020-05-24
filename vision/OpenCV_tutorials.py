@@ -789,41 +789,66 @@ def checkerboard_calibration(row, col):
     cv2.waitKey(0)
 
 def transform_pixel_to_checkerboard(row, col):
-    imgfile = '../img/p2c_test.png'
-    img = cv2.imread(imgfile)
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
-    # termination criteria
-    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
-
-    # Find the chess board corners
-    ret, corners = cv2.findChessboardCorners(gray, (row, col), None)
-    if ret == True:
-        # If found, add object points, image points (after refining them)
-        corners_refined = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
-
-        # Draw and display the corners
-        detected = cv2.drawChessboardCorners(img, (row, col), corners_refined, ret)
-        number_of_corners = corners_refined.shape[0]
-        corners_refined = corners_refined.ravel().reshape(number_of_corners, 2)
-
+    row=3
+    col=4
     # import camera intrinsics
     filename = '../calibration_files/calib_laptop.npz'
     with np.load(filename) as X:
         _, mtx, dist, _, t = [X[n] for n in ('ret', 'mtx', 'dist', 'rvecs', 'tvecs')]
 
+    # from calibration software
+    fx = 550.541
+    fy = 554.281
+    cx = 371.127
+    cy = 272.827
+    mtx = np.array([[fx, 0, cx], [0, fy, cy], [0, 0, 1]])
+    dist = np.array([0.088292, -0.274401, 0.013027, 0.024800])
+
     # prepare object points, like (0,0,0), (1,0,0), (2,0,0) ....,(row,col,0)
     objp = np.zeros((row * col, 3), np.float32)
-    objp[:, :2] = np.mgrid[0:row, 0:col].T.reshape(-1, 2)
-    _, rvecs, tvecs, _ = cv2.solvePnPRansac(objp, corners_refined, mtx, dist)
-    R = cv2.Rodrigues(rvecs)[0]
-    T = np.vstack((np.hstack((R, [[0],[0],[0]])), [0, 0, 0, 1]))
+    objp[:, :2] = np.mgrid[0:col, 0:row].T.reshape(-1, 2)
 
-    # input_pixel = [900, 300]
-    #
-    #
-    # cv2.imshow('checkerboard', detected)
-    # cv2.waitKey(0)
+    # unit cell size
+    # length = 13.59  # mm
+    length = 30  # mm
+    # length = 25.4
+
+    cap = cv2.VideoCapture(0)
+    while True:
+        ret, img = cap.read()
+
+        # imgfile = '../img/p2c_test.png'
+        # img = cv2.imread(imgfile)
+        gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+        # termination criteria
+        criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 30, 0.001)
+
+        key = cv2.waitKey(1) & 0xFF
+        # if key == ord('\r'):  # ENTER
+        # Find the chess board corners
+        ret, corners = cv2.findChessboardCorners(gray, (col, row), None)
+        if ret == True:
+            # If found, add object points, image points (after refining them)
+            corners_refined = cv2.cornerSubPix(gray, corners, (11, 11), (-1, -1), criteria)
+
+            # Draw and display the corners
+            cv2.drawChessboardCorners(img, (col, row), corners_refined, ret)
+            # corners_refined = np.squeeze(corners_refined)
+
+            # one time capturing camera intrinsic parameters is unreliable
+            # ret, mtx, dist, rvecs, tvecs1 =\
+            #     cv2.calibrateCamera([objp], [corners_refined], gray.shape[::-1], None, None)
+
+            _, rvecs, tvecs, _ = cv2.solvePnPRansac(objp, corners_refined, mtx, dist)
+
+            R = cv2.Rodrigues(rvecs)[0]
+            print ()
+            print (np.array(tvecs)*length)
+            print()
+        cv2.imshow("Image", img)
+        cv2.waitKey(1)
+
 
 def homography(row, col):
     imgfile = '../img/checker_board_inclined.png'
@@ -962,7 +987,7 @@ def load_intrinsics(self, filename):
 if __name__ == "__main__":
     # showImage()
     # showVideo()
-    writeVideo()
+    # writeVideo()
     # drawing()
     # mouseBrush()
     # trackbar()
@@ -993,7 +1018,7 @@ if __name__ == "__main__":
     # rotate_image()
     # scaling_image()
     # checkerboard_calibration(8,6)
-    # transform_pixel_to_checkerboard(4,4)
+    transform_pixel_to_checkerboard(5,7)
     # homography(4,3)
     # resize_img()
     # image stack (concatenate)
